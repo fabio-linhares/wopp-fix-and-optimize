@@ -529,8 +529,8 @@ def main():
         help='Medir speedup GPU vs CPU na redução de instância'
     )
     parser.add_argument(
-        '--output', type=str, default='results_v4/experiments_v4.csv',
-        help='Caminho do CSV de saída (default: results_v4/experiments_v4.csv)'
+        '--output', type=str, default='results/modulo_4/experiments.csv',
+        help='Caminho do CSV de saída (default: results/modulo_4/experiments.csv)'
     )
     parser.add_argument(
         '--workers', type=int, default=1,
