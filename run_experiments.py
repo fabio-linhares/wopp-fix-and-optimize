@@ -329,19 +329,22 @@ def measure_gpu_speedup(instance_path, config):
 
 
 def save_results_csv(results, output_path):
-    """Salva resultados em CSV."""
+    """Salva resultados em CSV, anexando-os se o arquivo já existir."""
     if not results:
         return
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    file_exists = os.path.exists(output_path) and os.path.getsize(output_path) > 0
 
     fieldnames = list(results[0].keys())
-    with open(output_path, 'w', newline='', encoding='utf-8') as f:
+    with open(output_path, 'a', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
+        if not file_exists:
+            writer.writeheader()
         writer.writerows(results)
 
-    print(f"\n  📄 Resultados salvos em: {output_path}")
+    print(f"\n  📄 Resultados salvos/anexados em: {output_path}")
+
 
 
 def print_results_table(results):
