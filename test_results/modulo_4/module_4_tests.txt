@@ -1,0 +1,91 @@
+Carregando configurações de: config.ini
+
+══════════════════════════════════════════════════════════════════════
+  BENCHMARK WOP — 1 instâncias × 2 configurações = 2 execuções
+  Timeout: 15s por instância
+  Solver: CPLEX
+  Workers paralelos: 1
+══════════════════════════════════════════════════════════════════════
+
+  [1/2] Iniciando: C1 | [A] instance_0001.txt
+
+Pré-processamento (CUDA) concluído em 0.01 segundos.
+155 itens únicos processados.
+
+
+============================================================
+  PLI SOLVER — INVERSE
+  61 pedidos, 116 corredores, 155 itens
+  LB=30, UB=68
+  Regime: False
+  c₀: False
+============================================================
+
+============================================================
+  REDUÇÃO DE INSTÂNCIA — GPU (CuPy)
+============================================================
+  Pedidos:        61 →     10 (16.4% mantidos)
+  Corredores:    116 →     24 (20.7% mantidos)
+  Tempos:
+    dense_matrix.................. 0.0002s
+    conflict_matrix............... 0.1204s
+    scores........................ 0.0014s
+    dominance..................... 0.0014s
+    filtering..................... 0.0001s
+    TOTAL......................... 0.1235s
+============================================================
+
+  Usando solver CBC (fallback)
+  Status: Optimal, Tempo solver: 0.32s
+
+  Métrica oficial (Σ S_o·x_o / Σ y_a): 4.428571
+  Tempo total: 0.44s
+
+  [1/2] Concluído: C1 | instance_0001.txt → métrica=4.4286 | tempo=0.44s | optimal | viável=✓
+  [2/2] Iniciando: C1_NoRed | [A] instance_0001.txt
+
+Pré-processamento (CUDA) concluído em 0.01 segundos.
+155 itens únicos processados.
+
+
+============================================================
+  PLI SOLVER — INVERSE
+  61 pedidos, 116 corredores, 155 itens
+  LB=30, UB=68
+  Regime: False
+  c₀: False
+============================================================
+  Usando solver CBC (fallback)
+  Status: Optimal, Tempo solver: 14.22s
+
+  Métrica oficial (Σ S_o·x_o / Σ y_a): 9.250000
+  Tempo total: 14.23s
+
+  [2/2] Concluído: C1_NoRed | instance_0001.txt → métrica=9.2500 | tempo=14.23s | optimal | viável=✓
+
+
+══════════════════════════════════════════════════════════════════════
+  RESULTADOS COMPLETOS
+══════════════════════════════════════════════════════════════════════
++----------+-------------------+---------+------------+---------+----------+---------+--------+
+| Config   | Instância         | Pedidos | Corredores | Métrica | Tempo(s) | Status  | Viável |
++----------+-------------------+---------+------------+---------+----------+---------+--------+
+| C1       | instance_0001.txt |    61→5 |      116→7 |  4.4286 |     0.44 | optimal |      ✓ |
+| C1_NoRed | instance_0001.txt |    61→8 |      116→4 |  9.2500 |    14.23 | optimal |      ✓ |
++----------+-------------------+---------+------------+---------+----------+---------+--------+
+
+======================================================================
+  RESUMO POR CONFIGURAÇÃO
+======================================================================
++----------+-----------------------------------------+---+---------------+--------------+-------------+----------+-----------+
+| Config   | Nome                                    | N | Métrica Média | Métrica Med. | Tempo Médio | % Ótimos | % Viáveis |
++----------+-----------------------------------------+---+---------------+--------------+-------------+----------+-----------+
+| C1       | Inversa + Rígido + Σy≥1                 | 1 |        4.4286 |       4.4286 |       0.44s |     100% |      100% |
+| C1_NoRed | Inversa + Rígido Sem Redução (Baseline) | 1 |        9.2500 |       9.2500 |      14.23s |     100% |      100% |
++----------+-----------------------------------------+---+---------------+--------------+-------------+----------+-----------+
+
+  📄 Resultados salvos em: results_v4/experiments_v4.csv
+
+  Tempo total acumulado: 14.67s (0.2min)
+  Soluções ótimas: 2/2
+  Soluções viáveis: 2/2
