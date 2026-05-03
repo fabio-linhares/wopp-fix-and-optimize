@@ -31,8 +31,8 @@ miniconda/
 datasets/
 base/
 results/
-src/
 docs/
+
 
 
 # Binários de Instalação e Licenças do CPLEX
