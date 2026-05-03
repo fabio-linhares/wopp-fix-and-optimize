@@ -13,6 +13,18 @@ Adotamos uma política rigorosa baseada em TDD e granularidade atômica:
 
 ---
 
+## Mudanças decorrentes da Revisão (Rian e Artigo Atual)
+
+### ⏪ Em relação ao que já fizemos (Módulo 3)
+- No Módulo 3, a linearização inversa McCormick de $w_o = x_o z$ e $u_a = y_a z$ é o padrão exato, mas a inclusão de termos de penalidade no regime flexível causa bilinearidade não linearizada ($P_L \delta z$). Documentar isso como limitação teórica no relatório para evitar enfraquecimento e manter alinhamento com a justificativa da Tabela 4 do artigo ("Causa provável de apenas 20% de viabilidade").
+
+### ⏩ Em relação ao que faremos (Módulos 4 e 5)
+- **Remoção do Baseline Autoral:** No Módulo 4 e 5, remover completamente a Tabela 5 que compara com a metaheurística híbrida autoral (ILS + GRASP + Tabu).
+- **Inclusão de Comparação com Literaturas do SBPO 2025:** Adicionar na Seção 5 uma comparação direta com os dados das tabelas de Santos & Baldotto (2025) e Leal et al. (2025), conforme Áudio 2 do orientador Rian.
+- **Ajustar a coluna residual `c0=1`:** Na Tabela 4 do artigo, remover a coluna residual `$c_0=1$` (Configurações C3 e C4) originada de um teste anterior que foi removido, focando apenas nas configurações C1, C2, C5 e C6.
+
+---
+
 ## Módulos de Desenvolvimento
 
 ### 📦 Módulo 1: Modelagem e Leitura de Dados (Data & Model Layer)
@@ -23,7 +35,7 @@ Adotamos uma política rigorosa baseada em TDD e granularidade atômica:
 
 ### 📦 Módulo 2: Pré-processamento e Filtragem (Fix-and-Optimize - GPU & CPU)
 - **Objetivo:** Implementar o filtro heurístico de dominância acelerado por GPU (CuPy) e em CPU.
-- **Ação:** Construir o cálculo das matrizes de conflito de rotas e dominância $O(n^2)$. Isolar o filtro de forma que ele reduza os pedidos fixando $x_o = 0$ para variáveis dominadas antes de passar para o solver MILP.
+- **Ação:** Construir o cálculo das matrizes de conflito de rotas e dominância $O(n^2)$. Isolar o filtro de forma que ele reduz os pedidos fixando $x_o = 0$ para variáveis dominadas antes de passar para o solver MILP.
 
 ---
 
@@ -48,6 +60,7 @@ Adotamos uma política rigorosa baseada em TDD e granularidade atômica:
 - **Mudanças:** 
   - Enquadrar definitivamente a heurística como *Fix-and-Optimize*.
   - Demonstrar as vantagens e trade-offs da aceleração por GPU.
+  - Remover a comparação autoral de ILS/Tabu e incluir a comparação com as tabelas de Santos & Baldotto (2025) e Leal et al. (2025).
 
 ---
 
