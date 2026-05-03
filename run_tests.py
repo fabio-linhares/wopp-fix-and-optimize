@@ -8,7 +8,8 @@
 # DATA DE CRIAÇÃO: 03/05/2026
 # VERSÃO: 1.0.0
 # DESENVOLVEDOR: Fabio Linhares <fl@ic.ufal.br>
-# DESENVOLVEDOR: Cristiano Estumano <ce@ic.ufal.br>
+# DESENVOLVEDOR: Cristiano Estumano <ces@ic.ufal.br>
+
 # LICENÇA: MIT License
 # ====================================================================
 
