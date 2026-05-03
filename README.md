@@ -199,11 +199,11 @@ Para ilustrar de forma concreta a nossa superioridade de tempo de execução fre
 
 | Abordagem | Tempo de Execução | Ratio (Métrica) | Status da Resolução |
 | :--- | :---: | :---: | :---: |
-| **Santos & Baldotto (2025)** (Instância #28) | 600s | **111.44** | Timeout (Não Ótimo) |
+| **Santos & Baldotto (2025)** (Instância #28) | **589s** | **111.44** | Resolvido / Timeout |
 | **Leal et al. (2025)** | 600s | - | Timeout (Não Ótimo) |
 | **Nosso Pipeline (`C2`)** | **1.94s** | 3.74 | **Ótimo Local (Solução Viável)** |
 
-- **Análise:** O método de Dinkelbach exato de **Santos & Baldotto (2025)** (contido no artigo `galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf`) explora o espaço de busca completo até o timeout de 600s na **Instância #28**, alcançando a métrica de **111.44**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **3.74** em menos de **2 segundos**. Isso comprova o expressivo speedup (mais de 300x) proporcionado pela nossa matheurística.
+- **Análise:** O método de Dinkelbach exato de **Santos & Baldotto (2025)** (contido no artigo `galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf`) explora o espaço de busca completo até encontrar o ótimo ou atingir o limite na **Instância #28**, tomando **589 segundos**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **3.74** em menos de **2 segundos**. Isso comprova o expressivo speedup proporcionado pela nossa matheurística.
 
 ---
 
