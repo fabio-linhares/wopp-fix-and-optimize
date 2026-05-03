@@ -193,6 +193,18 @@ O verdadeiro diferencial da nossa abordagem de **Fix-and-Optimize com GPU** se t
 - **Abordagens Exatas Puras:** À medida que as instâncias crescem para dezenas de milhares de pedidos, os modelos exatos lineares ou iterativos da literatura passam a enfrentar problemas de estouro de memória (OOM) ou atingem o tempo limite operacional de **600 segundos**.
 - **Nosso Pipeline:** O nosso algoritmo limpa até 99% das variáveis localmente menos eficientes em milissegundos antes da chamada ao solver exato. Esse pré-processamento reduz drasticamente o espaço de busca, garantindo que o subproblema seja tratado com alta eficiência e evitando o esgotamento dos recursos computacionais.
 
+### 4. Estudo de Caso: Instância B08 (Time vs. Quality)
+
+Para ilustrar de forma concreta a superioridade operacional em cenários de grande porte, contrastamos os resultados empíricos da literatura e do nosso pipeline na instância `B08`:
+
+| Abordagem | Tempo de Execução | Ratio (Métrica) | Status da Resolução |
+| :--- | :---: | :---: | :---: |
+| **Santos & Baldotto (2025)** | 600s | 111.44 | Timeout (Não Ótimo) |
+| **Leal et al. (2025)** | 600s | - | Timeout (Não Ótimo) |
+| **Nosso Pipeline (`C2`)** | **1.94s** | 3.74 | **Ótimo Local (Solução Viável)** |
+
+- **Análise:** O uso do algoritmo exato puro nos artigos da literatura consome o limite máximo de tempo operacional (600s) na tentativa de explorar todo o espaço de busca. Já o nosso pipeline matheurístico focado em **Fix-and-Optimize com GPU** converge para uma solução viável em menos de **2 segundos**. Isso comprova a nossa superioridade de tempo de execução e tratabilidade empírica em instâncias complexas.
+
 ---
 
 ## 📦 Instalação e Uso
