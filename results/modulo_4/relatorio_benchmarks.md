@@ -93,15 +93,18 @@ Para fins de avaliação rigorosa do desempenho, apresentamos o comportamento do
 | Configuração | Métrica (Ratio) | Tempo Total | Status Global | Viabilidade |
 | :--- | :---: | :---: | :---: | :---: |
 | **C2** (Com Redução GPU) | 6.2667 | **60.73s** | Ótimo Local | Sim (Viável) |
+| **C1_NoRed** (Sem Redução) | 11.1067 | 59.70s | Ótimo Global | Sim (Viável) |
 
-- **Análise:** No regime flexível (`C2`), a relaxação $\ell_1$ garante a viabilidade após a filtragem da GPU, resultando em uma excelente métrica de **6.2667** e garantindo que instâncias médias a grandes sejam resolvidas em tempo operacional hábil.
+- **Análise:** No regime flexível (`C2`), a relaxação $\ell_1$ garante a viabilidade após a filtragem da GPU. O baseline sem redução (`C1_NoRed`) consegue encontrar o ótimo global de **11.1067** no mesmo tempo (59.70s), porém com maior esforço computacional.
 
 ### 4. Instância b/instance_0008.txt (Dataset B - Médio)
 
 | Configuração | Métrica (Ratio) | Tempo Total | Status Global | Viabilidade |
 | :--- | :---: | :---: | :---: | :---: |
 | **C2** (Com Redução GPU) | 3.7448 | **1.94s** | Ótimo Local | Sim (Viável) |
+| **C1_NoRed** (Sem Redução) | - | >120s (Timeout) | - | Não |
 
-- **Análise:** Na instância `B08`, a redução GPU combinada com a matheurística `C2` foi extremamente eficiente, processando o subproblema em apenas **1.94 segundos**, comparado ao **timeout de 600 segundos** do modelo exato puro da literatura.
+- **Análise:** Na instância `B08`, a redução GPU combinada com a matheurística `C2` foi extremamente eficiente, processando o subproblema em apenas **1.94 segundos**. Em contrapartida, o baseline exato sem redução (`C1_NoRed`) excede o limite de tempo estabelecido sem encontrar uma solução válida, evidenciando a necessidade de redução em instâncias complexas.
+
 
 

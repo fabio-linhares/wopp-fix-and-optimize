@@ -5,3 +5,4 @@ C1,Inversa + Rígido + Σy≥1,instance_0001.txt,datasets/b/instance_0001.txt,11
 C1_NoRed,Inversa + Rígido Sem Redução (Baseline),instance_0001.txt,datasets/b/instance_0001.txt,11321,185,11321,185,35.097345,3167,113,3966,True,optimal,99.0895,0.0,99.0895,,B
 C2,Inversa + Flexível + Σy≥1,instance_0007.txt,datasets/b/instance_0007.txt,1841,165,48,62,6.266667,15,15,94,True,optimal,60.7347,0.1451,60.5896,,B
 C2,Inversa + Flexível + Σy≥1,instance_0008.txt,datasets/b/instance_0008.txt,12334,398,0,0,3.744828,131,145,543,False,optimal,1.937,0.0,0.0,,B
+C1_NoRed,Inversa + Rígido Sem Redução (Baseline),instance_0007.txt,datasets/b/instance_0007.txt,1841,165,0,0,11.106667,675,75,833,True,optimal,59.7013,0.0,0.0,,B
