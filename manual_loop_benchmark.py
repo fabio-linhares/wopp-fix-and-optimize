@@ -60,7 +60,7 @@ def main():
         
         print(f"-> Concluído Iteração {i}: Ratio={official_metric} | Tempo do Passo={step_elapsed:.2f}s")
 
-    output_path = "results/modulo_4/manual_loop_results.csv"
+    output_path = "results/modulo_4/loop_benchmark_results.csv"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=results_list[0].keys())
