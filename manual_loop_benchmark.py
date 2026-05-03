@@ -15,13 +15,10 @@ from src.solvers.pli.pli_solver import PLISolver
 
 def main():
     print("══════════════════════════════════════════════════════════════════════")
-    print("  MANUAL LOOP BENCHMARK - EXECUÇÃO DIRETA NO TERMINAL")
+    print("  MANUAL LOOP BENCHMARK - EXECUÇÃO DIRETA NO TERMINAL (589s)")
     print("══════════════════════════════════════════════════════════════════════")
 
     config = load_config()
-    # Forçamos uma configuração viável para demonstrar o benchmark
-    config['algorithm']['time_limit'] = 180  # Limite por iteração para não demorar demais
-    
     instance_path = "datasets/b/instance_0008.txt"
 
     if not os.path.exists(instance_path):
@@ -31,10 +28,23 @@ def main():
 
     results_list = []
     start_all = time.time()
-    
-    # 3 Iterações Reais
-    for i in range(1, 4):
-        print(f"\n[Iteração {i}/3] Carregando e resolvendo instância B08...")
+    max_duration = 589.0
+    iteration = 1
+
+    # Loop contínuo até atingir o limite de 589 segundos
+    while (time.time() - start_all) < max_duration:
+        current_elapsed = time.time() - start_all
+        remaining_time = max_duration - current_elapsed
+
+        if remaining_time <= 1:
+            print("\nTempo limite de 589s praticamente atingido. Finalizando benchmark.")
+            break
+
+        print(f"\n[Iteração {iteration}] Tempo acumulado: {current_elapsed:.2f}s / {max_duration}s")
+        
+        # Ajusta o limite de tempo do solver de acordo com o tempo restante
+        config['algorithm']['time_limit'] = min(120.0, remaining_time)
+
         problem = WaveOrderPickingProblem(config=config)
         problem.read_input(instance_path)
 
@@ -48,7 +58,7 @@ def main():
         aisles_visited = len(solution.visited_aisles) if solution and solution.visited_aisles else 0
 
         results_list.append({
-            'iteration': i,
+            'iteration': iteration,
             'elapsed_accumulated': round(time.time() - start_all, 2),
             'step_time': round(step_elapsed, 4),
             'n_orders': problem.n_orders,
@@ -58,7 +68,9 @@ def main():
             'ratio': official_metric
         })
         
-        print(f"-> Concluído Iteração {i}: Ratio={official_metric} | Tempo do Passo={step_elapsed:.2f}s")
+        print(f"-> Concluído Iteração {iteration}: Ratio={official_metric} | Tempo do Passo={step_elapsed:.2f}s")
+        
+        iteration += 1
 
     output_path = "results/modulo_4/loop_benchmark_results.csv"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -67,7 +79,7 @@ def main():
         writer.writeheader()
         writer.writerows(results_list)
 
-    print(f"\n📄 Resultados salvos com sucesso em: {output_path}")
+    print(f"\n📄 Resultados reais do Loop Benchmark salvos em: {output_path}")
 
 if __name__ == "__main__":
     main()
