@@ -170,6 +170,8 @@ O quadro abaixo posiciona as abordagens da literatura recente e o nosso pipeline
 
 ## 📦 Instalação e Uso
 
+O ambiente foi totalmente preparado e validado para suportar aceleração por GPU via **CuPy** e resolução exata MILP com o **IBM CPLEX**.
+
 ### Opção 1: Miniconda
 Para instalar o ambiente Python com as dependências exatas a partir do arquivo Conda:
 
@@ -177,6 +179,7 @@ Para instalar o ambiente Python com as dependências exatas a partir do arquivo 
 conda env create -f environment.yml
 conda activate wopp
 ```
+
 
 ### Opção 2: Python Virtualenv + Pip
 Se preferir utilizar um ambiente virtual clássico via pip com o arquivo de requisitos:

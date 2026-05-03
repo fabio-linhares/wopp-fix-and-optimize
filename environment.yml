@@ -10,3 +10,4 @@ dependencies:
   - pytest>=7.3.0
   - pip:
     - cupy-cuda12x>=12.2.0
+    - cplex>=22.1.2.1
