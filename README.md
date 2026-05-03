@@ -168,8 +168,9 @@ O quadro abaixo posiciona as abordagens da literatura recente e o nosso pipeline
 ## 📊 Equivalência Métrica e de Protocolo frente à Literatura (SBPO 2025)
 
 Avaliamos detalhadamente a nossa matheurística frente aos trabalhos exatos de **Santos & Baldotto (2025)** e **Leal et al. (2025)**. Embora esses autores utilizem métodos exatos puros, o nosso pipeline e os seus trabalhos compartilham de uma equivalência matemática e experimental profunda, o que permite contextualizar o desempenho da nossa solução. Os artigos originais estão salvos no repositório para auditoria:
-- [Artigo de Santos & Baldotto (2025)](docs/papers/galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf)
-- [Artigo de Leal et al. (2025)](docs/papers/galoa-proceedings-sbpo-2025-uma-formulacao-linear-e-um-algoritmo-exato-para-o-problema-da-se.pdf)
+- [Artigo de Leal et al. (2025)](docs/papers/galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf)
+- [Artigo de Santos & Baldotto (2025)](docs/papers/galoa-proceedings-sbpo-2025-uma-formulacao-linear-e-um-algoritmo-exato-para-o-problema-da-se.pdf)
+
 
 ### 1. Equivalência Métrica e do Protocolo de Instâncias
 
@@ -195,15 +196,15 @@ O verdadeiro diferencial da nossa abordagem de **Fix-and-Optimize com GPU** se t
 
 ### 4. Estudo de Caso: Instância B08 (Time vs. Quality)
 
-Para ilustrar de forma concreta a nossa superioridade de tempo de execução frente aos métodos exatos da literatura, contrastamos os resultados empíricos dos artigos com o nosso pipeline na instância **B08** (Dataset B, correspondente à **Instância #28** na Tabela 1 de Santos & Baldotto):
+Para ilustrar de forma concreta a nossa superioridade de tempo de execução frente aos métodos exatos da literatura, contrastamos os resultados empíricos dos artigos com o nosso pipeline na instância **B08** (Dataset B, correspondente à **Instância #28** na Tabela 1 de Leal et al.):
 
 | Abordagem | Tempo de Execução | Ratio (Métrica) | Status da Resolução |
 | :--- | :---: | :---: | :---: |
-| **Santos & Baldotto (2025)** (Instância #28) | **589s** | **111.44** | Resolvido / Timeout |
-| **Leal et al. (2025)** | 600s | - | Timeout (Não Ótimo) |
+| **Leal et al. (2025)** (Instância #28) | **589s** | **111.44** | Resolvido / Timeout |
+| **Santos & Baldotto (2025)** | 600s | - | Timeout (Não Ótimo) |
 | **Nosso Pipeline (`C2`)** | **1.94s** | 3.74 | **Ótimo Local (Solução Viável)** |
 
-- **Análise:** O método de Dinkelbach exato de **Santos & Baldotto (2025)** (contido no artigo `galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf`) explora o espaço de busca completo até encontrar o ótimo ou atingir o limite na **Instância #28**, tomando **589 segundos**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **3.74** em menos de **2 segundos**. Isso comprova o expressivo speedup proporcionado pela nossa matheurística.
+- **Análise:** O método de Dinkelbach exato de **Leal et al. (2025)** (contido no artigo `galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf`) explora o espaço de busca completo até encontrar o ótimo ou atingir o limite na **Instância #28**, tomando **589 segundos**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **3.74** em menos de **2 segundos**. Isso comprova o expressivo speedup proporcionado pela nossa matheurística.
 
 ---
 
