@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src.config_manager import load_config
 from src.models.problem import WaveOrderPickingProblem
 from src.solvers.pli.pli_solver import PLISolver
+from src.utils.validator import SolutionValidator
 
 def main():
     print("══════════════════════════════════════════════════════════════════════")
@@ -19,6 +20,10 @@ def main():
     print("══════════════════════════════════════════════════════════════════════")
 
     config = load_config()
+    
+    # GARANTIAS DE TRATABILIDADE: ativamos redução e impomos limite de tempo
+    config['algorithm']['instance_reduction'] = 'true'
+
     instance_path = "datasets/b/instance_0008.txt"
 
     if not os.path.exists(instance_path):
@@ -42,8 +47,8 @@ def main():
 
         print(f"\n[Iteração {iteration}] Tempo acumulado: {current_elapsed:.2f}s / {max_duration}s")
         
-        # Ajusta o limite de tempo do solver de acordo com o tempo restante
-        config['algorithm']['time_limit'] = min(120.0, remaining_time)
+        # O solver usa a chave max_runtime para limitar a busca exata
+        config['algorithm']['max_runtime'] = str(int(min(30, remaining_time)))
 
         problem = WaveOrderPickingProblem(config=config)
         problem.read_input(instance_path)
@@ -57,6 +62,13 @@ def main():
         orders_selected = len(solution.selected_orders) if solution and solution.selected_orders else 0
         aisles_visited = len(solution.visited_aisles) if solution and solution.visited_aisles else 0
 
+        # Validação da solução via validador do Mercado Livre
+        is_valid = False
+        if solution:
+            is_valid = SolutionValidator.validate_solution(problem, solution)
+        
+        print(f"-> Validador Mercado Livre: {'APROVADO ✅' if is_valid else 'REPROVADO ❌'}")
+
         results_list.append({
             'iteration': iteration,
             'elapsed_accumulated': round(time.time() - start_all, 2),
@@ -65,7 +77,8 @@ def main():
             'n_aisles': problem.n_aisles,
             'selected_orders': orders_selected,
             'visited_aisles': aisles_visited,
-            'ratio': official_metric
+            'ratio': official_metric,
+            'is_valid': is_valid
         })
         
         print(f"-> Concluído Iteração {iteration}: Ratio={official_metric} | Tempo do Passo={step_elapsed:.2f}s")
@@ -79,7 +92,7 @@ def main():
         writer.writeheader()
         writer.writerows(results_list)
 
-    print(f"\n📄 Resultados do Loop Benchmark salvos em: {output_path}")
+    print(f"\n📄 Resultados reais do Loop Benchmark salvos em: {output_path}")
 
 if __name__ == "__main__":
     main()
