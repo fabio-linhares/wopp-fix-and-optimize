@@ -96,3 +96,12 @@ Para fins de avaliação rigorosa do desempenho, apresentamos o comportamento do
 
 - **Análise:** No regime flexível (`C2`), a relaxação $\ell_1$ garante a viabilidade após a filtragem da GPU, resultando em uma excelente métrica de **6.2667** e garantindo que instâncias médias a grandes sejam resolvidas em tempo operacional hábil.
 
+### 4. Instância b/instance_0008.txt (Dataset B - Médio)
+
+| Configuração | Métrica (Ratio) | Tempo Total | Status Global | Viabilidade |
+| :--- | :---: | :---: | :---: | :---: |
+| **C2** (Com Redução GPU) | 3.7448 | **1.94s** | Ótimo Local | Sim (Viável) |
+
+- **Análise:** Na instância `B08`, a redução GPU combinada com a matheurística `C2` foi extremamente eficiente, processando o subproblema em apenas **1.94 segundos**, comparado ao **timeout de 600 segundos** do modelo exato puro da literatura.
+
+
