@@ -170,10 +170,12 @@ O quadro abaixo posiciona as abordagens da literatura recente e o nosso pipeline
 
 ## 📊 Comparação Científica com a Literatura (SBPO 2025)
 
-Avaliei detalhadamente os resultados publicados por **Santos & Baldotto (2025)** e **Leal et al. (2025)** frente às instâncias oficiais do Desafio Mercado Livre de Otimização. Com base nos artigos, é perfeitamente possível traçar uma comparação científica direta devido à equivalência da métrica oficial e do protocolo de instâncias.
+Avaliamos detalhadamente os resultados publicados por **Santos & Baldotto (2025)** e **Leal et al. (2025)** frente às instâncias oficiais do Desafio Mercado Livre de Otimização. Com base nos artigos, é perfeitamente possível traçar uma comparação científica direta devido à equivalência da métrica oficial e do protocolo de instâncias. Os artigos originais estão disponíveis para validação pública e auditoria em nossa base de dados local:
+- [Artigo de Santos & Baldotto (2025)](base/galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf)
+- [Artigo de Leal et al. (2025)](base/galoa-proceedings-sbpo-2025-uma-formulacao-linear-e-um-algoritmo-exato-para-o-problema-da-se.pdf)
 
 ### 1. Santos & Baldotto (2025) vs. Nosso Pipeline (Módulo 4)
-O trabalho de Santos & Baldotto aplica o Método de Dinkelbach puro em uma estação de trabalho equipada com CPU de 13ª geração. Como eles utilizam uma abordagem exata pura, os resultados obtidos representam o limite superior ótimo de produtividade para o problema sob o regime rígido:
+O trabalho de Santos & Baldotto aplica o Método de Dinkelbach puro. Como utilizam uma abordagem exata pura, os resultados obtidos representam o limite superior ótimo de produtividade para o problema sob o regime rígido (conforme documentado na Tabela 1 do artigo de Santos & Baldotto):
 
 | Instância | Ótimo Teórico (Santos & Baldotto, 2025) | Nosso Pipeline (Com Redução GPU - C1) | Tempo Santos & Baldotto (s) | Nosso Tempo C1 (s) |
 | :--- | :---: | :---: | :---: | :---: |
@@ -184,9 +186,9 @@ O trabalho de Santos & Baldotto aplica o Método de Dinkelbach puro em uma esta�
 - **Análise:** O nosso pipeline obteve **100% de otimalidade** nos testes das instâncias pequenas enquanto acelerou consideravelmente o tempo total graças ao filtro inicial de dominância via CuPy, demonstrando a superioridade da matheurística.
 
 ### 2. Leal et al. (2025) vs. Nosso Pipeline (Módulo 4)
-Leal et al. exploram três abordagens: uma linearização MILFP (`ref-lin`), um algoritmo iterativo e paralelo (`par-it`) e um método híbrido. 
+Leal et al. exploram três abordagens: uma linearização MILFP (`ref-lin`), um algoritmo iterativo e paralelo (`par-it`) e um método híbrido (conforme Tabela 1 do artigo de Leal et al.). 
 - Em instâncias de grande porte (como Dataset B e C), a ausência de um pré-processamento de filtragem de instâncias no artigo de Leal et al. faz com que as abordagens exatas puras atinjam o **Timeout de 600 segundos**.
-- Em contrapartida, a nossa estratégia de **Fix-and-Optimize com GPU** limpa o espaço de decisão em milissegundos antes da chamada ao solver exato. Com isso, evitamos estouros de memória (OOM) e garantimos a convergência rápida para subproblemas de alta qualidade dentro do limite operacional.
+- Em contrapartida, a nossa estratégia de **Fix-and-Optimize com GPU** limpa o espaço de decisão em milissegundos antes da chamada ao solver exato. Com isso, evitamos estouros de memória (OOM) e garantimos a convergência rápida para subproblemas de alta qualidade dentro do limite operacional de 10 minutos.
 
 ---
 
