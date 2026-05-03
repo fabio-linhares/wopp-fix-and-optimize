@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+# ====================================================================
+# PROJETO: WOPP - Wave Order Picking Problem (SBPO 2026)
+# Universidade Federal de Alagoas (UFAL)
+# Programa de Pós Graduação em Informática - Mestrado (PPGI)
+# DATA DE CRIAÇÃO: 03/05/2026
+# VERSÃO: 1.0.0
+# DESENVOLVEDOR: Fabio Linhares <fl@ic.ufal.br>
+# DESENVOLVEDOR: Cristiano Estumano <ce@ic.ufal.br>
+# LICENÇA: MIT License
+# ====================================================================
 """
 Redução de instância por GPU (conflito + dominância).
 
@@ -13,6 +23,7 @@ Pode operar em GPU (CuPy) ou CPU (NumPy) de forma transparente.
 """
 
 import numpy as np
+
 import time
 
 # Tentativa de importar e verificar CuPy *funcional*

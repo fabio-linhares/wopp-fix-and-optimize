@@ -1,6 +1,18 @@
+# ====================================================================
+# PROJETO: WOPP - Wave Order Picking Problem (SBPO 2026)
+# Universidade Federal de Alagoas (UFAL)
+# Programa de Pós Graduação em Informática - Mestrado (PPGI)
+# DATA DE CRIAÇÃO: 03/05/2026
+# VERSÃO: 1.0.0
+# DESENVOLVEDOR: Fabio Linhares <fl@ic.ufal.br>
+# DESENVOLVEDOR: Cristiano Estumano <ce@ic.ufal.br>
+# LICENÇA: MIT License
+# ====================================================================
+
 import pytest
 import os
 from src.models.problem import WaveOrderPickingProblem
+
 
 def test_read_valid_instance():
     instance_text = """2 3 2
