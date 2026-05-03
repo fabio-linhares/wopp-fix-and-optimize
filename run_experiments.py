@@ -48,7 +48,7 @@ from src.utils.instance_reducer import InstanceReducer
 
 
 # ═══════════════════════════════════════════════════════════════════
-# Definição das 6 configurações experimentais
+# Definição das 4 configurações experimentais (conforme o plano atualizado)
 # ═══════════════════════════════════════════════════════════════════
 
 CONFIGURATIONS = {
@@ -64,18 +64,6 @@ CONFIGURATIONS = {
         'soft_constraints': True,
         'use_c0': False,
     },
-    'C3': {
-        'name': 'Inversa + Rígido + c₀=1',
-        'linearizer': 'inverse',
-        'soft_constraints': False,
-        'use_c0': True,
-    },
-    'C4': {
-        'name': 'Inversa + Flexível + c₀=1',
-        'linearizer': 'inverse',
-        'soft_constraints': True,
-        'use_c0': True,
-    },
     'C5': {
         'name': 'Dinkelbach + Rígido + Σy≥1',
         'linearizer': 'dinkelbach',
@@ -89,6 +77,7 @@ CONFIGURATIONS = {
         'use_c0': False,
     },
 }
+
 
 
 def apply_config(base_config, experiment_cfg):
