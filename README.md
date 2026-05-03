@@ -162,32 +162,29 @@ O quadro abaixo posiciona as abordagens da literatura recente e o nosso pipeline
 
 1. **Tratabilidade do Dataset X:** O pré-processamento em GPU atua como um filtro prévio eficaz, permitindo que instâncias complexas (como as do Dataset X) sejam tratadas dentro do limite operacional de 10 minutos.
 2. **Mitigação de Inviabilidade Local:** A relaxação via penalidade $\ell_1$ atua como um mecanismo de estabilização, reduzindo a incidência de cenários de inviabilidade após a etapa de redução.
-3. **Versatilidade de Motores:** O pipeline permite alternar entre os dois motores clássicos de programação fracionária:
-   - **Formulação Inversa + Penalização:** Resolução em uma única chamada em cerca de **26 segundos**, priorizando a rapidez.
-   - **Dinkelbach + Penalização:** Resolução iterativa em cerca de **257 segundos**, priorizando a qualidade da solução.
 
 ---
 
 ## 📊 Comparação Científica com a Literatura (SBPO 2025)
 
-Avaliamos detalhadamente os resultados publicados por **Santos & Baldotto (2025)** e **Leal et al. (2025)** frente às instâncias oficiais do Desafio Mercado Livre de Otimização. Com base nos artigos, é perfeitamente possível traçar uma comparação científica direta devido à equivalência da métrica oficial e do protocolo de instâncias. Os artigos originais estão disponíveis para validação pública e auditoria em nossa base de dados local:
+Avaliamos detalhadamente os resultados publicados por **Santos & Baldotto (2025)** e **Leal et al. (2025)** frente às instâncias oficiais do Desafio Mercado Livre de Otimização. Com base nos artigos, é possível traçar uma comparação científica direta devido à equivalência da métrica oficial e do protocolo de instâncias. Os artigos originais estão disponíveis para validação pública e auditoria em nossa base de dados local:
 - [Artigo de Santos & Baldotto (2025)](base/galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf)
 - [Artigo de Leal et al. (2025)](base/galoa-proceedings-sbpo-2025-uma-formulacao-linear-e-um-algoritmo-exato-para-o-problema-da-se.pdf)
 
 ### 1. Santos & Baldotto (2025) vs. Nosso Pipeline (Módulo 4)
-O trabalho de Santos & Baldotto aplica o Método de Dinkelbach puro. Como utilizam uma abordagem exata pura, os resultados obtidos representam o limite superior ótimo de produtividade para o problema sob o regime rígido (conforme documentado na Tabela 1 do artigo de Santos & Baldotto):
+O trabalho de Santos & Baldotto aplica o Método de Dinkelbach puro. Como utilizam uma abordagem exata pura, os resultados obtidos representam o limite superior ótimo de produtividade para o problema sob o regime rígido. A Tabela 1 de Santos & Baldotto apresenta o valor ótimo (Ratio) para cada uma das 35 instâncias. Abaixo contrastamos o ótimo teórico documentado com o comportamento da nossa matheurística:
 
-| Instância | Ótimo Teórico (Santos & Baldotto, 2025) | Nosso Pipeline (Com Redução GPU - C1) | Tempo Santos & Baldotto (s) | Nosso Tempo C1 (s) |
+| Instância | Ótimo Teórico (Tabela 1 de Santos & Baldotto, 2025) | Nossa Abordagem (C1) | Tempo Santos & Baldotto (s) | Nosso Tempo C1 (s) |
 | :--- | :---: | :---: | :---: | :---: |
-| **A01** | 15.00 | 15.00 | <1s | **0.43s** |
-| **A02** | 2.00 | 2.00 | <1s | **0.31s** |
-| **A03** | 12.00 | 12.00 | <1s | **0.41s** |
+| **A01** | 15.00 | 4.4286 | 0s | **0.43s** |
+| **A02** | 2.00 | *Viável* | 0s | **< 1s** |
+| **A03** | 12.00 | *Viável* | 0s | **< 1s** |
 
-- **Análise:** O nosso pipeline obteve **100% de otimalidade** nos testes das instâncias pequenas enquanto acelerou consideravelmente o tempo total graças ao filtro inicial de dominância via CuPy, demonstrando a superioridade da matheurística.
+- **Análise:** O ótimo teórico absoluto estabelece o limite superior do problema. A nossa matheurística (`C1`), ao aplicar o filtro heurístico de dominância acelerado em GPU (Fix-and-Optimize), reduz o espaço de busca e converge em frações de segundo para soluções viáveis, atuando como uma excelente alternativa para obtenção de soluções rápidas em produção.
 
 ### 2. Leal et al. (2025) vs. Nosso Pipeline (Módulo 4)
-Leal et al. exploram três abordagens: uma linearização MILFP (`ref-lin`), um algoritmo iterativo e paralelo (`par-it`) e um método híbrido (conforme Tabela 1 do artigo de Leal et al.). 
-- Em instâncias de grande porte (como Dataset B e C), a ausência de um pré-processamento de filtragem de instâncias no artigo de Leal et al. faz com que as abordagens exatas puras atinjam o **Timeout de 600 segundos**.
+O artigo de Leal et al. explora três abordagens exatas puras: uma linearização MILFP (`ref-lin`), um algoritmo iterativo e paralelo (`par-it`) e um método híbrido. Diferente de Santos & Baldotto, o artigo de Leal et al. não traz os dados de Ratio detalhados por instância em sua Tabela 1, mas apresenta métricas agregadas de tempos e GAPs em suas Figuras 3 e 4:
+- Em instâncias de grande porte (como Datasets B e C), a ausência de um pré-processamento de filtragem de instâncias no artigo de Leal et al. faz com que as abordagens exatas puras atinjam o **Timeout de 600 segundos** em múltiplos cenários.
 - Em contrapartida, a nossa estratégia de **Fix-and-Optimize com GPU** limpa o espaço de decisão em milissegundos antes da chamada ao solver exato. Com isso, evitamos estouros de memória (OOM) e garantimos a convergência rápida para subproblemas de alta qualidade dentro do limite operacional de 10 minutos.
 
 ---
