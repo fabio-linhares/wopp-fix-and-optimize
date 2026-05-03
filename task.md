@@ -6,10 +6,10 @@
 - [x] **📦 Módulo 2: Pré-processamento e Filtragem (Fix-and-Optimize - GPU & CPU)**
     - [x] Implementar o filtro heurístico de dominância acelerado por GPU e CPU.
     - [x] Criar testes para validar a redução de escopo.
-- [ ] **📦 Módulo 3: Motores de Otimização e Regime Flexível (Solver Layer)**
-    - [ ] Implementar a Formulação Inversa.
-    - [ ] Implementar o Método de Dinkelbach Puro.
-    - [ ] Integrar a Relaxação de Restrições via Penalidade $\ell_1$.
+- [x] **📦 Módulo 3: Motores de Otimização e Regime Flexível (Solver Layer)**
+    - [x] Implementar a Formulação Inversa.
+    - [x] Implementar o Método de Dinkelbach Puro.
+    - [x] Integrar a Relaxação de Restrições via Penalidade $\ell_1$.
 - [ ] **📦 Módulo 4: Protocolo de Benchmarks e Geração de Resultados**
     - [ ] Executar benchmark com redução de GPU.
     - [ ] Executar benchmark sem redução de GPU (Baseline).
