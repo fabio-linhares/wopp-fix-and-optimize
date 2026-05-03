@@ -1,0 +1,30 @@
+# Ignorar Git
+.git
+.gitignore
+
+# Ignorar ambientes virtuais e conda
+.venv
+env
+venv
+.conda
+.miniconda
+miniconda
+
+# Ignorar Caches do Python
+__pycache__
+*.pyc
+*.pyo
+
+# Ignorar logs e saídas de testes locais
+*.log
+*.sol
+*.clp
+*.lp
+
+# Ignorar documentação e materiais de apoio no contexto do Docker
+docs/
+base/
+datasets/
+results/
+*.md
+!README.md

@@ -1,0 +1,12 @@
+name: wopp
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy>=1.24.0
+  - pandas>=2.0.0
+  - pulp>=2.7.0
+  - pytest>=7.3.0
+  - pip:
+    - cupy-cuda12x>=12.2.0

@@ -1,0 +1,45 @@
+# Caches do Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ambientes Virtuais e Miniconda
+.venv/
+env/
+venv/
+ENV/
+.conda/
+.miniconda/
+miniconda/
+
+# Logs e Saídas de Benchmark
+*.log
+*.sol
+*.clp
+*.lp
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Datasets, Documentos e Materiais de Apoio
+datasets/
+docs/
+base/
+results/
+src/
+
+# Binários de Instalação e Licenças do CPLEX
+cos_installer_*.bin
+response.properties
+config.ini
+*.key
+*.token
+.env
+keys.json
+keys.example.json
