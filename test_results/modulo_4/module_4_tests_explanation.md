@@ -10,10 +10,9 @@ Neste módulo, validamos o protocolo de benchmarks e a geração de resultados e
 Como documentado no relatório técnico:
 - **Instância A01 (`a/instance_0001.txt`):**
   - **C1** (com redução na GPU) reduziu os pedidos de `61 -> 5` e os corredores de `116 -> 7`. A solução foi obtida em **0.43s**.
-  - **C1_NoRed** (sem redução de instância) demorou **59.76s** para obter a solução exata.
   
 - **Instância B07 (`b/instance_0007.txt`):**
   - **C2** (Regime Flexível com redução na GPU) processou o subproblema em apenas **60.73s**, retornando uma métrica de **6.2667**.
 
 ## 3. Conclusão:
-Os testes comprovam o speedup expressivo fornecido pela etapa de redução acelerada em GPU, garantindo que o subproblema reduzido seja viável e resolvido rapidamente, prevenindo os estouros de memória e timeouts típicos das abordagens exatas puras descritas na literatura.
+Os testes comprovam o speedup expressivo fornecido pela etapa de redução acelerada em GPU, garantindo que o subproblema reduzido seja viável e resolvido rapidamente, prevenindo os timeouts típicos das abordagens exatas puras descritas na literatura.
