@@ -61,8 +61,9 @@ def _initialize_cupy_environment(config):
 
 class WaveOrderPickingProblem:
     """
-    Representa o problema de Wave Order Picking do Mercado Livre.
+    Representa o problema de Wave Order Picking (WOPP) do Desafio SBPO 2025 e 2026.
     """
+
     
     def __init__(self, orders=None, aisles=None, n_items=0, wave_size_lb=0, wave_size_ub=0, config=None): # Adicionar config
         """Inicializa o problema."""
