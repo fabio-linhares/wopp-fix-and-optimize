@@ -45,14 +45,51 @@ def test_problem_fallback_preprocess():
     assert problem.item_units_by_order[11][0] == 3
 
 def test_empty_instance():
-    # Quando arquivo não existe, a função imprime mensagem e retorna self
     problem = WaveOrderPickingProblem()
     res = problem.read_input("non_existent_file.txt")
     assert res is problem
     assert len(problem.orders) == 0
 
 def test_edge_case_zero_orders():
-    # Uma instância válida porém sem pedidos
     problem = WaveOrderPickingProblem(orders={}, aisles={}, n_items=0, wave_size_lb=0, wave_size_ub=0)
     problem._preprocess_sequential()
     assert len(problem.order_units) == 0
+
+def test_wave_bounds_consistency():
+    # Testa os limites operacionais de wave
+    problem = WaveOrderPickingProblem(orders={}, aisles={}, n_items=0, wave_size_lb=50, wave_size_ub=10)
+    assert problem.wave_size_lb == 50
+    assert problem.wave_size_ub == 10
+
+def test_all_order_items_uniqueness():
+    # Testa a extração de itens únicos
+    orders = {
+        0: {10: 5, 11: 2},
+        1: {11: 1, 12: 4}
+    }
+    problem = WaveOrderPickingProblem(orders=orders, aisles={}, n_items=20, wave_size_lb=1, wave_size_ub=10)
+    problem._preprocess_sequential()
+    assert problem.all_order_items == {10, 11, 12}
+
+def test_order_units_sum():
+    # Valida o cálculo exato do somatório de itens demandados em um pedido
+    orders = {
+        0: {101: 5, 102: 10, 103: 15}
+    }
+    problem = WaveOrderPickingProblem(orders=orders, aisles={}, n_items=200, wave_size_lb=1, wave_size_ub=50)
+    problem._preprocess_sequential()
+    assert problem.order_units[0] == 30
+
+def test_invalid_line_format():
+    # Testa a resposta do parser ao tentar ler arquivo mal formatado
+    malformed_text = "not_a_number\n"
+    test_file = "malformed_instance.txt"
+    with open(test_file, "w") as f:
+        f.write(malformed_text)
+    try:
+        problem = WaveOrderPickingProblem()
+        problem.read_input(test_file)
+        assert len(problem.orders) == 0
+    finally:
+        if os.path.exists(test_file):
+            os.remove(test_file)

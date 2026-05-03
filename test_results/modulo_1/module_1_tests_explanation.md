@@ -36,10 +36,37 @@ Este documento detalha os testes unitários criados para validar a leitura das i
 
 ---
 
+## 5. `test_wave_bounds_consistency` (Validação de limites)
+- **Razão de ser:** Testa a persistência correta dos limites superior e inferior ($LB$, $UB$) definidos para o tamanho da wave.
+- **O que valida:**
+  - Garante que os limites são passados corretamente e mantidos inalterados pela classe.
+
+---
+
+## 6. `test_all_order_items_uniqueness` (Unicidade de itens)
+- **Razão de ser:** Valida a propriedade de identificação de itens únicos demandados.
+- **O que valida:**
+  - Confirma se a propriedade `all_order_items` contém exatamente os IDs únicos de itens presentes na totalidade dos pedidos.
+
+---
+
+## 7. `test_order_units_sum` (Somatório de itens por pedido)
+- **Razão de ser:** Garante o cálculo correto do volume total de unidades associadas a um pedido.
+- **O que valida:**
+  - Soma de forma precisa a quantidade de itens individuais requeridos em um pedido esparso.
+
+---
+
+## 8. `test_invalid_line_format` (Formato inválido de arquivo)
+- **Razão de ser:** Testa o tratamento de arquivos com cabeçalhos corrompidos ou mal formados.
+- **O que valida:**
+  - O parser detecta o erro de formatação na leitura inicial e encerra o parsing daquele arquivo graciosamente.
+
+---
+
 ## 💡 Significado do Percentual nos Resultados do Pytest
 
-Nos relatórios de execução gerados pelo framework `pytest` (como `module_1_tests.txt`), aparecem marcadores de percentual ao lado de cada linha de teste (Ex: `[ 50%]`, `[100%]`).
+Nos relatórios de execução gerados pelo framework `pytest` (como `module_1_tests.txt`), aparecem marcadores de percentual ao lado de cada linha de teste (Ex: `[ 12%]`, `[100%]`).
 
 - **O que este percentual significa:** Ele representa o **progresso de execução** da bateria de testes em relação ao total de testes coletados, e **não** o percentual de sucesso do teste individual.
 - **Por que é aceitável:** Se o teste exibe `PASSED` ao lado do percentual de progresso, significa que ele passou com **100% de sucesso**. O `[100%]` exibido na última linha simplesmente indica que todos os testes daquela sessão foram executados até o final.
-
