@@ -32,8 +32,7 @@ datasets/
 base/
 results/
 src/
-docs/*.pdf
-docs/rian/
+docs/
 
 
 # Binários de Instalação e Licenças do CPLEX
