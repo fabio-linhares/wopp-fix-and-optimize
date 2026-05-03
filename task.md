@@ -3,9 +3,9 @@
 - [x] **📦 Módulo 1: Modelagem e Leitura de Dados (Data & Model Layer)**
     - [x] Desenvolver o parser para leitura de todas as instâncias (A, B, C e X).
     - [x] Criar testes unitários para a classe de leitura.
-- [ ] **📦 Módulo 2: Pré-processamento e Filtragem (Fix-and-Optimize - GPU & CPU)**
-    - [ ] Implementar o filtro heurístico de dominância acelerado por GPU e CPU.
-    - [ ] Criar testes para validar a redução de escopo.
+- [x] **📦 Módulo 2: Pré-processamento e Filtragem (Fix-and-Optimize - GPU & CPU)**
+    - [x] Implementar o filtro heurístico de dominância acelerado por GPU e CPU.
+    - [x] Criar testes para validar a redução de escopo.
 - [ ] **📦 Módulo 3: Motores de Otimização e Regime Flexível (Solver Layer)**
     - [ ] Implementar a Formulação Inversa.
     - [ ] Implementar o Método de Dinkelbach Puro.
