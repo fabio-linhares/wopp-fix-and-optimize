@@ -1,28 +1,89 @@
-# Relatório de Resultados de Benchmarks - Módulo 4
+# Relatório Técnico de Benchmarks (Módulo 4)
 
 Este relatório apresenta os resultados obtidos com as configurações e os benchmarks definidos para a validação da matheurística proposta para o **Wave Order Picking Problem (WOPP - SBPO 2026)**.
 
-## 1. Configurações Experimentais Testadas
-Nossos testes avaliaram duas principais abordagens de otimização combinadas com regimes de restrição e redução de escopo:
-- **C1 (Inversa + Rígido + Σy≥1):** Formulação matheurística exata utilizando a redução de variáveis heurística baseada em dominância aproximada na GPU.
-- **C1_NoRed (Inversa + Rígido Sem Redução):** Modelo exato sem a etapa de pré-processamento de redução (Baseline).
+---
 
-## 2. Resultados Coletados
-Os testes foram realizados em uma instância padrão (`a/instance_0001.txt`) representativa do dataset A:
-- **Configuração C1 (Pipeline Proposto):**
-  - **Métrica:** 4.4286
-  - **Tempo Total:** 0.43s
-  - **Status:** Ótimo / Viável
+## ⚖️ Validação de Resultados: Como o Algoritmo Avalia e Certifica a Viabilidade
 
-- **Configuração C1_NoRed (Baseline):**
-  - **Métrica:** 15.00
-  - **Tempo Total:** 14.22s
-  - **Status:** Ótimo / Viável
+A viabilidade das soluções geradas pelo pipeline do Desafio Mercado Livre de Otimização é auditada de forma rigorosa por um módulo de validação estrito.
 
-## 3. Análise de Desempenho (Speedup)
-A partir dos dados empíricos observados, o pré-processamento acelerado em GPU e a redução do espaço de decisão de pedidos (`61 -> 10`) e corredores (`116 -> 24`) permitiram uma aceleração expressiva do tempo de resolução pelo solver.
-- **Tempo com Redução (C1):** 0.43s
-- **Tempo sem Redução (Baseline C1_NoRed):** 14.22s
-- **Speedup Proporcionado:** ~33x de redução de tempo.
+### 1. Critérios de Validação do Desafio
+Para que uma solução do WOPP/SPO seja considerada válida, ela deve cumprir simultaneamente duas condições principais:
 
-Esse comportamento evidencia o impacto e a necessidade do algoritmo Fix-and-Optimize em GPU para evitar estouro de memória (OOM) ou timeout em instâncias maiores e complexas.
+1. **Validação de Capacidade da Onda:** O total de unidades dos pedidos selecionados na onda ($O'$) deve estar contido no intervalo de capacidade inferior e superior estabelecidos pela instância:
+   $$\text{LB} \le \sum_{o \in O'} S_o \le \text{UB}$$
+2. **Validação de Estoque (Cobertura):** Para cada item $i$ solicitado pelos pedidos selecionados na onda, a quantidade total disponível nos corredores ativados ($A'$) deve ser suficiente para cobrir a demanda acumulada:
+   $$\sum_{o \in O'} U_{oi} \le \sum_{a \in A'} AV_{ai} \quad \forall i \in I$$
+
+### 2. Algoritmo de Validação (Trecho de Código)
+Abaixo está o trecho principal do código responsável por validar rigorosamente cada solução encontrada:
+
+```python
+@staticmethod
+def validate_solution(problem, solution):
+    """
+    Verifica se uma solução é viável para o problema original.
+    """
+    # 1. Verificar se o total de unidades está dentro dos limites
+    total_units = solution.total_units
+    if total_units < problem.wave_size_lb or total_units > problem.wave_size_ub:
+        return False
+    
+    # 2. Mapear demanda acumulada por item
+    items_needed = {}
+    for o in solution.selected_orders:
+        for item, quantity in problem.orders[o].items():
+            items_needed[item] = items_needed.get(item, 0) + quantity
+    
+    # 3. Mapear estoque disponível por item nos corredores ativados
+    items_available = {}
+    for a in solution.visited_aisles:
+        for item, quantity in problem.aisles[a].items():
+            items_available[item] = items_available.get(item, 0) + quantity
+    
+    # 4. Validar se a oferta supre a demanda
+    for item, quantity_needed in items_needed.items():
+        if quantity_needed > items_available.get(item, 0):
+            return False
+    
+    return True
+```
+
+---
+
+## 🧠 Clarificação Matemática: Ótimo Global vs. Ótimo Local / Viável
+
+Do ponto de vista da pesquisa operacional e da programação matemática, é fundamental diferenciar o status das soluções retornadas:
+
+### Ótimo Global (Global Optimum)
+- **Definição:** Uma solução é considerada um ótimo global quando ela foi calculada sobre o espaço de busca completo do problema original, e o solver certificou que nenhuma outra solução possui um valor de função objetivo superior.
+- **Configuração no Pipeline:** A configuração `C1_NoRed` (Sem Redução) opera sobre todas as variáveis e garante a otimalidade global caso o solver conclua a busca antes do timeout.
+
+### Ótimo Local / Viável (Local Optimum & Feasible Solution)
+- **Definição:** No nosso pipeline matheurístico (`C1`, `C2`, `C5`, `C6`), realizamos um pré-processamento de filtragem em GPU para remover variáveis localmente menos eficientes. Quando o solver resolve esse subproblema, ele encontra a solução ótima *para aquele subconjunto reduzido de variáveis*. 
+- **Impacto no Problema Global:** Ao avaliar a solução contra a formulação original, ela tem o status de **Ótimo Local**, o que significa que ela é uma **Solução Viável** para o problema global, mas não necessariamente o ótimo global absoluto.
+
+---
+
+## 📈 Resultados Experimentais Coletados
+
+Para fins de avaliação rigorosa do desempenho, apresentamos o comportamento do pipeline com redução (`C1`) em comparação com o baseline exato puro (`C1_NoRed`):
+
+### 1. Instância a/instance_0001.txt (Dataset A - Pequeno)
+
+| Configuração | Métrica (Ratio) | Tempo Total | Status Global | Viabilidade |
+| :--- | :---: | :---: | :---: | :---: |
+| **C1** (Com Redução GPU) | 4.4286 | **0.43s** | Ótimo Local | Sim (Viável) |
+| **C1_NoRed** (Sem Redução) | 15.0000 | 59.76s | Ótimo Global | Sim (Viável) |
+
+- **Análise:** A redução do espaço de decisão de pedidos e corredores acelerou a resolução em mais de **130 vezes** frente ao baseline sem pré-processamento.
+
+### 2. Instância b/instance_0001.txt (Dataset B - Médio)
+
+| Configuração | Métrica (Ratio) | Tempo Total | Status Global | Viabilidade |
+| :--- | :---: | :---: | :---: | :---: |
+| **C1** (Com Redução GPU) | 0.0000 | **0.39s** | - | Não (Inviável) |
+| **C1_NoRed** (Sem Redução) | 35.0973 | 99.09s | Ótimo Global | Sim (Viável) |
+
+- **Análise:** No regime rígido (`C1`), a redução heurística removeu variáveis necessárias para atingir o limite inferior ($LB$) nessa instância específica, resultando em inviabilidade local. Isso justifica o uso do **Regime Flexível com Penalidade $\ell_1$** (`C2` ou `C6`) em produção para restabelecer a viabilidade.
