@@ -25,7 +25,8 @@ import random
 
 TESTS_MAP = {
     "1": ("Módulo 1: Modelagem e Leitura", "src/models/test_problem.py"),
-    "2": ("Módulo 2: Pré-processamento e Filtragem", "src/utils/test_reducer.py")
+    "2": ("Módulo 2: Pré-processamento e Filtragem", "src/utils/test_reducer.py"),
+    "3": ("Módulo 3: Motores de Otimização e Regime Flexível", "src/solvers/pli/test_solver.py")
 }
 
 def run_command(cmd):

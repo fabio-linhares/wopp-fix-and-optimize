@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /home/zerocopia/miniconda3/envs/wop/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zerocopia/Downloads/sbpo 2026/Projeto_MercadoLivre_v4
+collecting ... collected 2 items
+
+src/solvers/pli/test_solver.py::test_solver_inverse PASSED               [ 50%]
+src/solvers/pli/test_solver.py::test_solver_dinkelbach PASSED            [100%]
+
+============================== 2 passed in 0.48s ===============================
