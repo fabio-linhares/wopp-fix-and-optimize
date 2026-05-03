@@ -33,3 +33,13 @@ Este documento detalha os testes unitários criados para validar a leitura das i
 - **Razão de ser:** Avalia a robustez do pipeline de processamento em situações de borda matemática (zero pedidos ou zero corredores).
 - **O que valida:**
   - Certifica que as matrizes de agregação de dados não geram erros de divisão por zero ou quebras de memória quando os conjuntos são vazios.
+
+---
+
+## 💡 Significado do Percentual nos Resultados do Pytest
+
+Nos relatórios de execução gerados pelo framework `pytest` (como `module_1_tests.txt`), aparecem marcadores de percentual ao lado de cada linha de teste (Ex: `[ 50%]`, `[100%]`).
+
+- **O que este percentual significa:** Ele representa o **progresso de execução** da bateria de testes em relação ao total de testes coletados, e **não** o percentual de sucesso do teste individual.
+- **Por que é aceitável:** Se o teste exibe `PASSED` ao lado do percentual de progresso, significa que ele passou com **100% de sucesso**. O `[100%]` exibido na última linha simplesmente indica que todos os testes daquela sessão foram executados até o final.
+
