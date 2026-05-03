@@ -1,0 +1,1211 @@
+Uma Formulação Linear e um Algoritmo Exato para o Problema da Seleção
+de Pedidos Ótima
+André Luiz Feijó dos Santos
+Universidade Federal de Viçosa
+Av. Peter Henry Rolfs, s/n, Campus Universitário 36570-900 - Viçosa - MG
+andre.santos1@ufv.br
+Pedro Fiorio Baldotto
+Universidade Federal de Viçosa
+Av. Peter Henry Rolfs, s/n, Campus Universitário 36570-900 - Viçosa - MG
+pedro.baldotto@ufv.br
+
+RESUMO
+Neste trabalho, é proposto um pipeline de resolução para o Problema de Seleção de
+Pedidos Ótima (SPO). Este pipeline é formado por uma etapa de redução iterativa do espaço de
+busca, por meio de duas rotinas paralelas que resolvem subproblemas do SPO com um número
+fixado de corredores, seguida de uma reformulação linear para a modelagem do problema, podendo
+ser resolvida de forma eficiente em solvers modernos. Os resultados mostraram que esta abordagem
+exata é capaz de resolver instâncias consideravelmente grandes até a otimalidade em tempo hábil,
+encontrando soluções ótimas em 27 das 35 instâncias públicas.
+PALAVRAS CHAVE. SPO, Agrupamento de Pedidos, Reformulação, Logı́stica, Otimização.
+Tópicos OD - Otimização Discreta, ONL - Otimização Não-Linear, POI - PO na Indústria
+
+ABSTRACT
+In this work, we propose a solution pipeline for the Optimal Order Selection Problem
+(OOS). This pipeline consists of an iterative reduction step of the search space, through two parallel
+routines that solve subproblems of the OOS with a fixed number of aisles, followed by a linear
+reformulation for modeling the problem, which can be efficiently solved using modern solvers.
+The results showed that this exact approach is capable of solving considerably large instances to
+optimality in a timely manner, finding optimal solutions in 27 out of 35 public instances.
+KEYWORDS. OOSP, Order Batching, Reformulation, Logistics, Optimization.
+Paper topics OD - Discrete Optimization, ONL - Non-linear Optimization, POI – OR in Industry
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+1. Introdução
+Estratégias de seleção de pedidos para entrega são fundamentais no setor de comércio e
+transporte de encomendas, e têm sido amplamente estudadas ao longo de décadas. A adoção de uma
+técnica de coleta, juntamente à métrica para avaliar sua produtividade, está totalmente associada ao
+modelo de negócio de cada empresa, o que implica na formulação de diversos problemas computacionais para atender a essas demandas, como Problemas de Agrupamento de Pedidos [Pardo
+et al., 2024] e de Roteamento em Armazéns [Masae et al., 2020]. Este trabalho foca em resolver o
+Problema da Seleção de Pedidos Ótima (SPO).
+O SPO foi proposto pelo M ERCADO L IVRE1 , para o desafio de otimização do LVII
+Simpósio Brasileiro de Pesquisa Operacional (SBPO)2 , em janeiro de 2025. A seguir, o problema é
+descrito conforme apresentado originalmente.
+Após a confirmação da compra pelo cliente, seu pedido é registrado em um backlog de
+preparação, para ser montado com base no prazo de entrega acordado. A etapa de processamento
+(montagem) de um pedido envolve localizar e coletar os itens que o compõem, para que, após
+preparado, possa ser enviado ao cliente.
+Os itens disponı́veis para montagem de pedidos são organizados em múltiplos corredores.
+Cada corredor contém um ou mais tipos de itens, e cada tipo de item pode ter exemplares distribuı́dos em diferentes corredores. Para que a etapa de montagem se torne mais eficiente, a coleta é
+realizada após selecionar um subconjunto dos pedidos no backlog (conjunto de pedidos pendentes)
+para serem preparados simultaneamente. A este subconjunto de pedidos, é dado o nome de wave.
+Para que uma wave seja válida, é preciso respeitar um limite mı́nimo e máximo de itens.
+O objetivo do SPO é encontrar uma wave capaz de maximizar a produtividade da etapa de
+coleta, seguindo uma determinada métrica. Para esta aplicação, a métrica foi definida como a razão
+da quantidade de itens coletados pelo número de corredores visitados. Todos os itens coletados
+devem ser utilizados para montar pedidos e cada pedido é montado apenas uma vez.
+A Figura 1 exemplifica esse processo. São apresentados um backlog, contendo quatro
+pedidos em espera – cada um com seus respectivos itens necessários – uma possı́vel distribuição
+de itens em corredores e, finalmente, uma possı́vel wave formada pelos pedidos do backlog. O
+exemplo restringe o espaço de solução às waves com pelo menos 10 itens e, no máximo, 19. A
+wave escolhida é formada pelos pedidos 1, 3 e 4. Note que não seria possı́vel montá-la visitando
+apenas um corredor, pois, para cada um, há pelo menos um pedido na wave que possui pelo menos
+um item cuja quantidade necessária é maior que a quantidade do mesmo no corredor. Porém, ao
+visitar apenas os corredores 1 e 2, é possı́vel preparar a wave. Além disso, é possı́vel montar exatamente o mesmo subconjunto de pedidos visitando, obrigatoriamente, todos os corredores, porém
+isso claramente reduz a produtividade.
+Assim, o valor objetivo da solução apresentada pela Figura 1 é 17
+2 = 8.5. É possı́vel
+provar que essa solução é, de fato, ótima. Note, ainda, que a wave formada apenas pelo pedido 4,
+montado usando apenas itens do corredor 2, possui valor objetivo 91 = 9, porém é inviável por não
+respeitar o limite inferior de itens.
+Neste trabalho, o SPO é formulado inicialmente como um problema de Programação Linear Inteira Mista Fracional (sigla em inglês, MILFP), uma classe de problemas N P-Difı́ceis, não
+convexos, com variáveis inteiras e contı́nuas, sujeito a restrições lineares e com objetivo definido
+pela razão entre duas funções [Yue et al., 2013]. Em seguida, é proposta uma reformulação para
+o problema, substituindo o objetivo fracional por uma função linear. Esse processo permite que o
+modelo seja resolvido de forma eficiente ao escrevê-lo como um problema de Programação Linear
+1
+2
+
+https://mercadolibre.com/
+https://sbpo2025.galoa.com.br/sbpo-2025/page/5407-home
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+Figura 1: Exemplo de formação de uma wave (Fonte: Autoria Própria).
+
+Inteira Mista (sigla em inglês, MILP). Ainda, é proposta uma série de otimizações para o modelo e
+uma estratégia para reduzir o espaço de soluções a ser explorado pela formulação linear. Essa estratégia consiste em modelar o subproblema em que o número de corredores é previamente definido.
+Assim, antes de otimizar o modelo reformulado, são abertas duas rotinas paralelas: uma resolve o
+problema inicialmente com apenas um corredor; a outra, com todos os corredores. A primeira,
+então, incrementa o número de corredores a cada iteração, enquanto a segunda o reduz progressivamente. Sempre que uma nova solução incumbente é encontrada, ela é registrada. Caso essas
+rotinas se encontrem em uma determinada iteração, após resolver esse caso, o algoritmo termina
+retornando a solução ótima. Caso isso não ocorra dentro do tempo limite, inicia-se a otimização
+com o modelo MILP, para buscar a solução ótima no intervalo de corredores restante.
+
+2. Trabalhos Relacionados
+Agrupamento de pedidos (Order batching) é uma estratégia popular utilizada para otimizar métricas de eficiência em operações logı́sticas em armazéns, com foco na formação de lotes de
+pedidos que podem ser processados de forma conjunta. No contexto do SPO, uma wave pode ser
+interpretada como um batch. Em [Chen e Wu, 2005], aplica-se mineração de dados, juntamente
+com programação inteira, para aumentar o grau de associatividade de pedidos em um mesmo batch.
+A motivação advém da tendência de que pedidos similares podem ser mais facilmente coletados em
+uma mesma viagem pelo armazém. Em [Yang et al., 2020], é proposto um algoritmo para apoiar decisões operacionais em armazéns multilocais. A primeira etapa do algoritmo define a configuração
+dos batchs, que consiste em definir quais itens os compõem.
+Outro conceito relevante na literatura é o de separação de pedidos (order picking), que
+envolve traçar uma rota de coleta de produtos pelo armazém. Ainda que o roteamento do coletor
+esteja fora do escopo deste problema, a minimização do número de corredores cumpre um papel
+semelhante de otimização da produtividade. Resolver problemas de order picking é uma tarefa
+importante e tem sido estudada desde o fim do século passado, como em [Ratliff e Rosenthal, 1983],
+que implementa um algoritmo visando minimizar a distância da rota de montagem dos pedidos. Em
+[Chen et al., 2016], é proposta a utilização de um método baseado em Ant Colony Optimization para
+realizar o roteamento de múltiplos agentes na coleta de pedidos.
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+O SPO combina aspectos de order batching e order picking, porém, o faz de maneira singular, ao não requerer o roteamento da coleta de produtos, mas sim a minimização do número de corredores necessários, além de solicitar a formação de uma única wave, em uma formulação MILFP.
+Até onde é de nosso conhecimento, tais caracterı́sticas conferem um caráter inédito à formulação
+do SPO, distinguindo-o dos problemas comumente abordados na literatura.
+3. Formulação do Problema
+Seja A o conjunto de corredores disponı́veis, I, o conjunto de todos os itens distribuı́dos
+por todos os corredores e O, o conjunto de pedidos do backlog. Uma solução π para o SPO é uma
+tupla (O′ , A′ ), em que O′ ⊆ O e A′ ⊆ A.
+Considere, ainda,
+S que Io ⊆ I é o conjunto de todos os itens solicitados para que o pedido
+o seja montado e I ′ = o∈O′ Io , o conjunto de todos os itens coletados pela wave. Seja wi,o a quantidade do item i solicitado para o pedido o (se o não solicita i, wi,o = 0) e qi,a , a quantidade
+P
+P do item
+i disponı́vel no corredor a (se a não oferta i, qi,a = 0). Por fim, assuma |π| = o∈O′ i∈Io wi,o
+como o número de itens coletados para a wave. A tı́tulo de abreviação, |π| será chamada de “tamanho da wave”.
+O objetivo do SPO é encontrar uma solução π que satisfaça
+max
+s.t.
+
+X
+
+wi,o ≤
+
+o∈O′
+
+X
+
+|π|
+|A′ |
+
+qi,a ,
+
+(1)
+∀i ∈ I ′
+
+(2)
+
+a∈A′
+
+LB ≤ |π| ≤ UB
+
+(3)
+
+para LB, UB ∈ Z+ , LB ≤ UB, os limites inferior e superior, respectivamente, para o tamanho da
+wave. É dito que é possı́vel montar os pedidos de O′ utilizando os corredores em A′ se, e somente
+se, O′ e A′ satisfizerem (2).
+4. Modelo de Programação Linear Inteira Mista Fracional
+Primeiramente, é proposto um modelo MILFP para resolver o SPO. Seja ya ∈ {0, 1} uma
+variável de decisão tal que ya = 1 se o corredor a é utilizado na solução e 0, caso contrário, e po
+uma variável de decisão tal que po = 1 se o pedido o é montado na solução e 0, caso contrário. O
+seguinte modelo MILFP é formulado:
+P
+P
+wi,o × po
+o∈O
+Pi∈Io
+max
+(4)
+a∈A ya
+s.t.
+
+X
+
+wi,o × po ≤
+
+o∈O
+
+X
+
+qi,a × ya ,
+
+∀i ∈ I
+
+(5)
+
+a∈A
+
+LB ≤
+
+XX
+
+wi,o × po ≤ UB
+
+(6)
+
+o∈O i∈Io
+
+ya , po ∈ {0, 1},
+
+∀o ∈ O, a ∈ A
+
+(7)
+
+A função objetivo (4) maximiza o valor da métrica de produtividade. A restrição (5)
+garante que o conjunto de pedidos da wave pode ser montado utilizando o conjunto de corredores.
+A restrição (6) garante que o tamanho da wave-solução respeita os limites impostos. A restrição (7)
+define o escopo das variáveis po e ya .
+Devido à natureza não convexa do modelo MILFP, podem ser utilizadas técnicas para
+transformar o programa em questão em um problema MILP. A seguir, é proposta uma formulação
+linear para o problema a partir do método da Reformulação-Linearização [Yue et al., 2013].
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+5. Método da Reformulação-Linearização
+A Transformação de Charnes-Cooper [Charnes e Cooper, 1962] é um método de reformulação
+de problemas de Programação Linear Fracional em programas lineares. Quando variáveis inteiras
+são introduzidas ao modelo, este método não é mais suficiente. Neste caso, Yue et al. [2013] apresentam uma abordagem capaz de remover a divisão entre variáveis na função objetivo. Como o
+SPO contém apenas variáveis binárias, a aplicação deste método se torna simples e direta. A seguir,
+essa técnica é descrita.
+São introduzidas ao modelo as variáveis contı́nuas u = P 1 ya , t ∈ R|O| e g ∈ R|A| ,
+a∈A
+tais que t = u × p e g = u × y. Assim, a partir da função objetivo fracional (4), obtém-se a seguite
+função linear:
+P
+P
+XX
+XX
+wi,o × po
+o∈O
+Pi∈Io
+≡u×
+wi,o × po ≡
+wi,o × to
+(8)
+a∈A ya
+o∈O i∈Io
+
+o∈O i∈Io
+
+Ainda, da definição de u, é possı́vel concluir
+u= P
+
+1
+a∈A ya
+
+≡
+
+X
+
+u × ya = 1 ≡
+
+a∈A
+
+X
+
+ga = 1
+
+(9)
+
+a∈A
+
+que também é linear. Portanto, o programa MILFP pode ser linearizado conforme o modelo abaixo,
+ao qual nos referiremos como ref-lin.
+XX
+max
+wi,o × to
+(10)
+o∈O i∈Io
+
+s.t.
+
+X
+
+wi,o × to ≤
+
+o∈O
+
+X
+
+qi,a × ga ,
+
+∀i ∈ I
+
+(11)
+
+a∈A
+
+LB × u ≤
+
+XX
+
+wi,o × to ≤ UB × u
+
+(12)
+
+o∈O i∈Io
+
+X
+
+ga = 1
+
+(13)
+
+a∈A
+
+to ≤ po
+
+∀o ∈ O
+
+(14)
+
+to ≤ u
+
+∀o ∈ O
+
+(15)
+
+to ≥ u − (1 − po )
+
+∀o ∈ O
+
+(16)
+
+ga ≤ ya
+
+∀a ∈ A
+
+(17)
+
+ga ≤ u
+
+∀a ∈ A
+
+(18)
+
+ga ≥ u − (1 − ya )
+
+∀a ∈ A
+
+(19)
+
+ya , po ∈ {0, 1},
+
+∀o ∈ O, a ∈ A
+
+(20)
+
+ga , to ≥ 0,
+
+∀o ∈ O, a ∈ A
+
+(21)
+
+Assim como o modelo MILFP inicial, a função objetivo (10) maximiza a razão da métrica
+de produtividade. As restrições (11) e (12) preservam as condições antes impostas por (5) e (6).
+A restrição (13) garante a corretude do valor de u, e as restrições (14) a (16) e (17) a (19) são
+linearizações de t = u × p e g = u × y, respectivamente.
+
+6. Algoritmo Iterativo Paralelo
+A resolução de um problema SPO possui duas camadas de otimização. A primeira, escolher os corredores que farão parte da solução. A segunda, quais pedidos serão montados. Cada
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+|A|!
+subconjunto de A com exatamente m corredores possui m!(|A|−m)!
+soluções, o que pode levar a
+espaços de busca significativamente grandes. Esta seção visa apresentar uma estratégia que pode
+ser aplicada tanto como simplificação do espaço de busca que será fornecido ao solver MILP quanto
+uma abordagem de resolução completa.
+Para o Algoritmo Iterativo Paralelo, o qual chamaremos de par-it, é fixado o denominador da fração expressa em (4) e, para cada valor possı́vel, é maximizado o numerador. Note
+que, se forem explorados todos os valores possı́veis para o elemento fixado dentro do tempo limite, é encontrada a solução ótima. O modelo MILP, para H corredores, a seguir descreve essa
+formulação.
+
+F(H) = max
+
+XX
+
+wi,o × po
+
+(22)
+
+o∈O i∈Io
+
+s.t.
+
+X
+
+ya = H,
+
+∀a ∈ A
+
+(23)
+
+∀i ∈ I
+
+(24)
+
+a∈A
+
+X
+
+wi,o × po ≤
+
+o∈O
+
+X
+
+qi,a × ya ,
+
+a∈A
+
+LB ≤
+
+XX
+
+wi,o × po ≤ UB
+
+(25)
+
+o∈O i∈Io
+
+ya , po ∈ {0, 1},
+
+∀o ∈ O, a ∈ A
+
+(26)
+
+A função objetivo (22) maximiza o número de itens coletados para a quantidade de corredores definida previamente. A restrição (23) garante que o número de corredores seja exatamente
+H e as restrições (24) e (25) garantem a viabilidade do tamanho da wave.
+A estratégia de busca proposta está descrita no Algoritmo 1. As iterações são divididas entre duas rotinas paralelas: A SCENDENTE, que incrementa, a partir de h = 1, o número de corredores
+fixado a cada iteração e D ESCENDENTE, que decrementa, a partir de H = |A|. A cada iteração,
+∗ e X∗
+cada rotina resolve o modelo (22) e são atualizadas as soluções incumbentes Xasc
+desc de suas
+respectivas rotinas. O algoritmo termina quando todo o intervalo discreto [1, |A|] é explorado, ou
+∗ , X ∗ }.
+quando o tempo limite é atingido. A melhor solução encontrada é max{Xasc
+desc
+Algorithm 1 Algoritmo Iterativo Paralelo
+1: h ← 1
+2: H ← |A|
+∗ , X∗
+3: Xasc
+desc ← 0
+4:
+5: function A SCENDENTE ()
+6:
+7:
+8:
+9:
+10:
+11:
+
+repeat
+X ← F(h)
+if X é viável then
+∗ ← max{X, X ∗ }
+Xasc
+asc
+h←h+1
+until h ≥ H
+
+function D ESCENDENTE ()
+repeat
+X ← F(H)
+if X é viável then
+∗
+∗ }
+Xdesc
+← max{X, Xdesc
+H ←H −1
+until H < h
+
+7. Otimizações
+Esta seção apresenta uma série de otimizações propostas para simplificar ainda mais o
+modelo que será otimizado pelo solver.
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+7.1. Redução de Variáveis
+e Restrições
+P
+Seja Qi = a∈A qi,a a quantidade total do item i ao longo de todos os corredores. Caso
+haja um pedido o ∈ O tal que, para algum i ∈ Io , wi,o > Qi , então esse pedido claramente não
+pode ser montado, e sua variável de decisão po é removida do modelo. Embora uma solução inteira
+na qual po = 1 seja obviamente inviável, a remoção da variável evita que valores fracionários sejam
+atribuı́dos a ela nas relaxações lineares da árvore Branch-and-Cut (B&C) [Conforti et al., 2014].
+Outra forma de remover variáveis é por meio do conceito de pedidos unitários. Um pedido
+o1 é dito ser unitário se, e somente se, existe i ∈ Io1 tal que wi,o1 = 1 ∧ ∀i′ , i ̸= i′ , wi′ ,o1 = 0. Isto
+é, pedidos que requisitam apenas uma unidade de exatamente um tipo de item. Seja Oi1 o conjunto
+de todos os pedidos unitários formados pelo item i e D̄i = |Oi1 |, a demanda do item i para pedidos
+unitários. Caso D̄i > Qi , então é possı́vel remover arbitrariamente D̄i − Qi pedidos pertencentes a
+Oi1 e suas respectivas variáveis de decisão, uma vez que implicam em um acréscimo equivalente na
+função objetivo e não impactam outras restrições.
+Por fim, seja Θ ⊆ O o conjunto de todos os pedidos que foram removidos por qualquer
+uma das estratégias acima, e i um item tal que ∀o, wi,o > 0 ⇒ o ∈ Θ. Em outras palavras, todo
+pedido que necessita de i foi removido do modelo. Isso significa que todas as restrições associadas
+a i podem ser removidas também, pois o lado esquerdo (LHS) dessas restrições-≤ sempre valerá
+zero. Chamaremos de Γ o conjunto de todos os itens que foram removidos por essa estratégia.
+7.2. Redução de Variáveis Booleanas
+Para todo pedido unitário que não foi removido pela estratégia acima, é desconsiderada
+sua restrição de integralidade. Assim, o escopo das variáveis po se torna:
+0 ≤ p o1 ≤ 1
+po ∈ {0, 1}
+
+∀o1 ∈ O1 \Θ
+1
+
+∀o ∈ O\{Θ ∪ O }
+
+(27)
+(28)
+
+A remoção das restrições de integralidade, nesse caso, preserva a validade do modelo. Se,
+em uma solução, para todo pedido unitário o1 , po1 = 1, então a solução é inteira.P
+Se não, se existe
+um conjunto de variáveis P que assumiram valor fracionário, então o somatório x∈P x pode ser
+fracionário ou inteiro. Se o primeiro caso for válido, então o valor objetivo X é fracionário e a
+solução não é ótima, pois é possı́vel obter uma solução ⌈X ⌉, uma vez que o limite da quantidade de
+itens a ser coletada é P
+sempre inteiro. Se for inteiro, então basta que um pós-processamento escolha
+arbitrariamente X − x∈P x variáveis de P para valer um e o resto, zero.
+7.3. Minimização de Coeficientes
+Coeficientes grandes podem levar o solver MILP a ter maior dificuldade em resolver o
+modelo. Portanto é preferı́vel que os coeficientes sejam os menores possı́veis. Um exemplo conhecido em que ocorre esse problema é no Método do Grande M. Esta subseção apresenta algumas
+estratégias para reduzir os coeficientes das restrições, preservando a validade doPmodelo.
+P
+Primeiramente, para todo i e a tal que a oferta qi,a > Di , onde Di = o∈O i∈Io wi,o é
+a demanda do item i por toda a instância, qi,a é atualizado para Di . Além disso, quando Di > qi,a e
+apenas um corredor a contém i, a tarefa de redução de coeficientes pode ser vista como a resolução
+de um Maximum Subset Sum em que é escolhido o subconjunto dos coeficientes do LHS da restrição
+que retorna a maior soma menor ou igual a qi,a . Isso pode ser feito a partir da seguinte formulação
+de Programação Dinâmica, onde c é o vetor de coeficientes do LHS.
+
+
+se Q < 0
+−∞,
+M(j, Q) = 0,
+(29)
+se Q = 0
+
+
+max (M(j + 1, Q), cj + M(j + 1, Q − cj )) , se j ∈ [1, |c|]
+qi,a = M(1, qi,a )
+
+(30)
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+Ainda, seja Ī o conjunto de todos os itens ī tais que, para todo a, qī,a > 0 ⇒ qī,a > Dī .
+Isto é, todo a que oferta ī é capaz de suprir toda a demanda do item na instância. Assim, substituı́mos
+as restrições (5) por
+X
+po ≤
+ya
+∀i ∈ Ī\Γ, ∀o ∈ Oi
+(31)
+a∈Ai
+
+X
+o∈O
+
+wi,o × po ≤
+
+X
+
+qi,a × ya
+
+∀i ∈ I\{Ī ∪ Γ}
+
+(32)
+
+a∈A
+
+onde Oi ⊆ O é o conjunto de todos os pedidos que dependem do item i e Ai ⊆ A, o conjunto de
+todos os corredores que contém o item i.
+7.4. Atualização de Bounds e Redução de Iterações
+Seja vinc = Th uma solução incumbente para o SPO em um dado instante da execução
+do algoritmo, em que T é o total de itens coletados e h, o número de corredores. Claramente,
+qualquer solução com h′ > h corredores consegue coletar pelo menos T itens. Porém, o algoritmo
+segue incrementando o número de corredores a fim de encontrar uma solução com valor objetivo
+maior que vinc , e não apenas mais itens. Portanto, assim que uma solução viável é encontrada, toda
+iteração posterior tem o lower bound para o tamanho da wave atualizado para ⌈vinc × h′ ⌉. Essa
+estratégia força o modelo a selecionar uma solução que colete um número de itens T ′ grande o
+′
+suficiente para que vh′ = Th′ supere vinc , reduzindo o número de soluções viáveis (possivelmente
+todo o espaço de soluções) na iteração. O upper bound, por sua vez, é atualizado com o número
+máximo de itens da última iteração executada pela rotina descendente, se houver solução viável.
+Além disso, é possı́vel reduzir o intervalo de busca de novas soluções para [h + 1, ⌊ vUB
+⌋],
+inc
+UB
+UB
+pois, a partir da iteração ⌊ vinc ⌋ + 1, mesmo que seja possı́vel coletar UB itens, UB/(⌊ vinc ⌋ + ℓ) <
+vinc , ∀ℓ > 0. Caso a rotina descendente não esteja no intervalo, seu processo de otimização é simplesmente abortado e ela é transportada para a iteração ⌊ vUB
+⌋. Em um dado instante de execução,
+inc
+caso a rotina ascendente ainda não tenha encontrado solução viável e a descendente encontre uma
+iteração inviável, então o processo é finalizado, pois é notório que a solução incumbente da rotina
+descendente é ótima e nenhuma iteração seguinte será sequer viável.
+Por fim, é proposta uma estratégia de “aceleração” da rotina descendente. Foi observado
+que, em instâncias viáveis, é comum que o limite superior de itens (UB) seja coletado ao longo
+de todo um intervalo [H ′ , |A|]. Para isso, o decremento unitário pode ser substituı́do por um decremento em β ≥ 1 unidades. Isso evita que a rotina descendente expenda recursos em iterações
+redundantes, pois, se na iteração H, o tamanho máximo da wave é UB e, em H − β, também, então
+claramente este é o tamanho máximo da wave em todo o intervalo [H − β, H]. Para evitar que
+seja descartada a iteração em que é encontrada a solução ótima, o valor de β é atualizado para um
+quando ou a rotina descendente encontra uma solução com menos de UB itens ou ela é transportada para o intervalo [h + 1, ⌊ vUB
+⌋] pela rotina ascendente. No primeiro caso, a rotina descendente
+inc
+ainda é transportada para a iteração H − 1, para explorar as iterações indevidamente descartadas.
+Ainda, se par-it é finalizado por time out em uma iteração H − β, então o intervalo considerado
+explorado é [h, H − 1].
+8. Método Hı́brido
+Descritos completamente a reformulação linear para o SPO, o algoritmo iterativo paralelo
+e as otimizações propostas, é possı́vel montar um pipeline de resolução baseado em, inicialmente,
+reduzir o espaço de busca com o par-it e finalizar a otimização pelo ref-lin. Caso par-it
+não seja capaz de resolver o problema no tempo limite, restando apenas o intervalo de corredores
+[h, H], o número de lower e upper bounds são atualizados na restrição (12), de acordo com as
+soluções encontradas nas rotinas, e é adicionada a seguinte restrição em ref-lin:
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+Figura 2: Pipeline de otimização proposto para o SPO.
+
+h≤
+
+X
+
+ya ≤ H,
+
+∀a ∈ A
+
+(33)
+
+a∈A
+
+A Figura 2 representa graficamente este pipeline. O objetivo desta estratégia é combinar
+as vantagens dos dois métodos apresentados. Cada iteração de par-it resolve um subproblema
+significativamente menor que o SPO, ao fixar o número de corredores. No entanto, alguns subproblemas ainda podem ser intrinsecamente complexos, ou podem haver muitos corredores na instância
+original. Sendo assim, finalizar a resolução com ref-lin permite que o espaço de busca (reduzido) que restou seja otimizado por completo, encontrando soluções que estariam em iterações às
+quais par-it não teria tempo para alcançar.
+
+9. Resultados Experimentais
+Foram disponibilizadas pelo M ERCADO L IVRE um total de 35 instâncias de teste3 , e definido um limite de tempo de 10 minutos (600s) para cada uma. É garantido que todas as instâncias
+possuem solução viável.
+Toda a solução foi implementada em Java 17, utilizando CPLEX 22.11 como solver MILP.
+Todos os testes foram executados em computador com um processador Intel® Core™ i7-12700H
+(2.30GHz) de 12ª geração, com 16G de memória RAM. Foi testada a resolução do SPO por ambos
+os métodos par-it e ref-lin e pela abordagem hı́brida par-it + ref-lin. O parâmetro
+β foi considerado como ⌈1% × |A|⌉. Para par-it + ref-lin, foram testados limites, de 30s
+em 30s, para a redução do espaço de busca. Os melhores resultados foram obtidos para 3 minutos
+e 30s (210s). Por questões de espaço, serão os únicos resultados apresentados para este método.
+Em par-it, cada rotina executou o solver com quatro threads disponı́veis, e para ref-lin,
+foram disponibilizadas oito threads. Embora as abordagens sejam totalmente determinı́sticas, para
+considerar ligeiras variações em função do escalonamento de processos do sistema operacional, as
+abordagens que utilizam par-it foram executadas três vezes.
+A Tabela 1 apresenta os resultados obtidos pelas três abordagens descritas. Cada linha
+apresenta os resultados de uma instância, cujo ı́ndice está na primeira coluna. Em seguida, as
+próximas três colunas apresentam o número de pedidos, itens e corredores, respectivamente. As
+colunas t (s) apresentam o tempo, em segundos, que cada algoritmo levou para resolver a instância.
+As colunas GAP apresentam a diferença percentual da solução encontrada pelo método em questão
+3
+
+https://github.com/mercadolibre/challenge-sbpo-2025
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+para a solução ótima. Quando uma instância é marcada com †, significa que nenhum dos três
+métodos conseguiu garantir que a solução encontrada é ótima. Nesses casos, foi considerada a melhor solução encontrada dentre os três como referência. As instâncias marcadas com ⋆ são aquelas
+que foram resolvidas instantaneamente, nos referiremos a elas como “instâncias instantâneas”. As
+colunas hasc e hdesc apresentam a próxima iteração que deixou de ser executada pelas rotinas AS CENDENTE e DESCENDENTE , respectivamente. Em par-it + ref-lin, este é o intervalo que
+será otimizado pelo modelo linearizado. Quando a solução ótima foi encontrada, o valor é omitido.
+Todos os dados das colunas par-it e par-it + ref-lin são valores médios das execuções.
+par-it + ref-lin
+
+1⋆
+2⋆
+3⋆
+4⋆
+5
+6
+7
+8
+9⋆
+10 †
+11 †
+12 ⋆
+13
+14
+15
+16 ⋆
+17 ⋆
+18
+19 ⋆
+20 ⋆
+21
+22
+23
+24 †
+25
+26 †
+27 ⋆
+28
+29
+30
+31 †
+32 †
+33 †
+34 †
+35
+
+par-it
+
+ref-lin
+
+|O|
+
+|I|
+
+|A|
+
+t (s)
+
+GAP
+
+hasc
+
+hdes
+
+t (s)
+
+GAP
+
+hasc
+
+hdes
+
+t (s)
+
+GAP
+
+61
+7
+82
+16
+2625
+10341
+8320
+2185
+70
+1602
+1029
+133
+8375
+12402
+7367
+1108
+417
+2682
+2257
+5
+11321
+2162
+2070
+2448
+6468
+1857
+1841
+12334
+5581
+14952
+45112
+28263
+38214
+38202
+11541
+
+155
+7
+246
+59
+6407
+7089
+5747
+5831
+222
+3689
+2784
+337
+7525
+10974
+6633
+1051
+411
+2309
+2104
+5
+7675
+5922
+5617
+6271
+4959
+4982
+1621
+10365
+4990
+13510
+37820
+24432
+32604
+32238
+9905
+
+116
+33
+124
+91
+161
+184
+180
+168
+304
+383
+375
+342
+413
+413
+402
+88
+83
+90
+134
+5
+185
+165
+164
+163
+179
+165
+165
+398
+417
+482
+482
+483
+483
+483
+398
+
+0
+0
+0
+0
+600
+2
+6
+600
+0
+600
+600
+0
+44
+76
+20
+0
+0
+0
+0
+0
+4
+195
+183
+600
+2
+600
+0
+98
+23
+164
+600
+600
+600
+600
+179
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+2
+0
+0
+3
+0
+
+10
+10
+20
+21
+9
+9
+4
+7
+5
+4
+-
+
+19
+17
+103
+84
+43
+45
+237
+183
+223
+218
+-
+
+0
+0
+0
+0
+420
+2
+6
+572
+0
+600
+600
+0
+44
+76
+20
+0
+0
+0
+0
+0
+4
+195
+183
+600
+2
+600
+0
+98
+23
+164
+600
+600
+600
+600
+179
+
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+87
+84
+84
+0
+0
+
+21
+23
+12
+13
+7
+10
+8
+6
+-
+
+102
+60
+17
+42
+197
+153
+193
+188
+-
+
+0
+0
+0
+0
+600
+1
+61
+600
+0
+600
+600
+0
+600
+600
+10
+0
+0
+7
+0
+0
+6
+376
+397
+600
+23
+600
+0
+600
+600
+600
+600
+600
+600
+600
+600
+
+0
+0
+0
+0
+5
+0
+0
+3
+0
+13
+11
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+5
+0
+8
+0
+0
+0
+0
+0
+3
+10
+2
+3
+
+Tabela 1: Resultados experimentais para os três métodos estudados.
+
+Dentre todas as 35 instâncias, 11 foram consideradas instantâneas e, em apenas oito, não
+foi garantida otimalidade. Das 27 instâncias resolvidas por pelo menos um método, o maior número
+de pedidos foi de 14952, de itens, 13510 e de corredores, 482, todos os valores se referindo à
+instância 30. Quando as rotinas de par-it não convergiram para uma iteração em comum, a
+abordagem explorou, em média, 75% do intervalo, e etapa iterativa de par-it + ref-lin,
+73%. Porém par-it puro explorou completamente o intervalo de duas instâncias a mais.
+A Figura 3 ilustra os tempos obtidos por cada método nas instâncias não-instantâneas e
+em que pelo menos uma das abordagens não foi finalizada por time out. O nı́vel de dificuldade
+destas instâncias varia entre fácil e mediano, por não serem nem instantâneas, nem levarem todos
+os métodos a time out. Destas 16 instâncias, não houve empate das três abordagens em 14 e, em 13
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+destas, par-it obteve uma performance melhor que ref-lin, não sendo finalizada em time out
+nenhuma das vezes. Dentre todas estas 16 instâncias, na abordagem hı́brida, a etapa par-it foi
+suficiente para resolvê-las. Nos outros dois casos, o método hı́brido terminou em time out.
+
+Figura 3: Tempo das instâncias não-instantâneas em que, em pelo menos um método, não houve time out.
+
+O próximo gráfico, da Figura 4, apresenta os GAPs obtidos por cada método nas instâncias
+em que pelo menos uma das abordagens foi finalizada por time out. Primeiramente, vale observar
+que, nas instâncias em que o método hı́brido não foi finalizado apenas executando a etapa par-it,
+a abordagem ainda assim retornou a solução ótima. Novamente, o gráfico conta com 16 instâncias,
+das quais houve empate dos três métodos em cinco. Destas 11 instâncias, ref-lin apresentou o
+pior GAP, dentre os três métodos, em sete, e par-it, em três. Nestas três instâncias, a abordagem apresentou um comportamento consideravelmente destoante dos resultados em outros testes.
+Esse resultado reflete a distância de soluções melhores em relação às extremidades do intervalo de
+busca, levando às rotinas a executarem muitas iterações inviáveis ou redundantes. Por outro lado, a
+abordagem par-it + ref-lin não só apresentou soluções significativamente melhores, como
+também prevaleceu dentre os três métodos em duas das três instâncias.
+
+Figura 4: GAP das instâncias em que, em pelo menos um método, houve time out.
+
+10. Conclusão e Trabalhos Futuros
+Neste trabalho, foram desenvolvidas e comparadas três abordagens exatas para o SPO. A
+primeira, uma linearização da modelagem MILFP do problema. A segunda, um algoritmo iterativo
+e paralelo que, em cada iteração, otimiza um subproblema do SPO com exatamente H corredores.
+A terceira, um método hı́brido que combina qualidades de ambas as abordagens anteriores.
+Os resultados experimentais mostraram que todas as estratégias são capazes de retornar
+soluções ótimas em tempo hábil, sendo úteis tanto aplicação na indústria quanto para a avaliação de
+abordagens heurı́sticas. O algoritmo par-it foi o método que prevaleceu, em relação ao tempo,
+em 14 das 16 instâncias em que não houve empate. Por outro lado, nos casos em que as melhores iterações distam das extremidades do intervalo [1, |A|], o comportamento desta abordagem foi
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+
+significativamente pior que os dos outros métodos. Nestes casos, a reformulação linear conseguiu
+explorar mais amplamente as soluções, por não tratar múltiplos subproblemas redundantes. Por fim,
+o método hı́brido foi capaz de combinar a redução do espaço de busca de par-it com a resolução
+ampla de ref-lin. Quando a própria etapa iterativa não foi suficiente para resolver o problema,
+a modelagem MILP encontrou soluções tão boas quanto, ou melhores, que par-it puro.
+Em trabalhos futuros, é importante estudar o efeito do uso de abordagens heurı́sticas para
+o SPO no tempo de execução e nas soluções obtidas. Ainda, pretendemos estudar detalhadamente
+as caracterı́sticas que impactam na dificuldade de resolução de uma instância e propor estratégias
+para contornar esses desafios.
+11. Agradecimentos
+Agradecemos ao M ERCADO L IVRE e à Sociedade Brasileira de Pesquisa Operacional
+(SOBRAPO) pela proposta do desafio em parceria, e ao M ERCADO L IVRE pela disponibilização
+das instâncias de teste.
+
+Referências
+Charnes, A. e Cooper, W. W. (1962). Programming with linear fractional functionals. Naval Research Logistics Quarterly, 9(3-4):181–186. URL https://onlinelibrary.wiley.com/
+doi/abs/10.1002/nav.3800090303.
+Chen, F., Wang, H., Xie, Y., e Qi, C. (2016). An aco-based online routing method for multiple order
+pickers with congestion consideration in warehouse. Journal of Intelligent Manufacturing, 27
+(2):389–408. ISSN 1572-8145.
+Chen, M.-C. e Wu, H.-P. (2005). An association-based clustering approach to order batching considering customer demand patterns. Omega, 33(4):333–343.
+Conforti, M., Cornuéjols, G., e Zambelli, G. (2014). Getting Started, p. 1–44. Springer International Publishing, Cham. ISBN 978-3-319-11008-0. URL https://doi.org/10.1007/
+978-3-319-11008-0_1.
+Masae, M., Glock, C. H., e Grosse, E. H. (2020). Order picker routing in warehouses: A
+systematic literature review. International Journal of Production Economics, 224:107564.
+ISSN 0925-5273. URL https://www.sciencedirect.com/science/article/
+pii/S0925527319304050.
+Pardo, E. G., Gil-Borrás, S., Alonso-Ayuso, A., e Duarte, A. (2024). Order batching problems: Taxonomy and literature review. European Journal of Operational Research, 313(1):1–
+24. ISSN 0377-2217. URL https://www.sciencedirect.com/science/article/
+pii/S0377221723001534.
+Ratliff, H. D. e Rosenthal, A. S. (1983). Order-picking in a rectangular warehouse: a solvable case
+of the traveling salesman problem. Operations research, 31(3):507–521.
+Yang, P., Zhao, Z., e Guo, H. (2020). Order batch picking optimization under different storage
+scenarios for e-commerce warehouses. Transportation Research Part E: Logistics and Transportation Review, 136:101897. ISSN 1366-5545.
+Yue, D., Guillén-Gosálbez, G., e You, F. (2013). Global optimization of large-scale mixed-integer
+linear fractional programming problems: A reformulation-linearization method and process scheduling applications. AIChE Journal, 59.
+
+DOI: 10.59254/sbpo-2025-212172
+https://proceedings.science/p/212172?lang=pt-br
+Powered by TCPDF (www.tcpdf.org)
+
+
