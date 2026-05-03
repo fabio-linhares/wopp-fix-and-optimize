@@ -1,5 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# ====================================================================
+# PROJETO: WOPP - Wave Order Picking Problem (SBPO 2026)
+# Universidade Federal de Alagoas (UFAL)
+# Programa de Pós Graduação em Informática - Mestrado (PPGI)
+# DATA DE CRIAÇÃO: 03/05/2026
+# VERSÃO: 1.0.0
+# DESENVOLVEDOR: Fabio Linhares <fl@ic.ufal.br>
+# DESENVOLVEDOR: Cristiano Estumano <ce@ic.ufal.br>
+# LICENÇA: MIT License
+# ====================================================================
+
 """
 Orquestrador Interativo de Testes - WOPP (SBPO 2026)
 Permite executar todos os testes, testes por módulo, ordem aleatória ou escolha específica.
@@ -19,12 +31,9 @@ def run_command(cmd):
     """Executa um comando no shell conda ou python e imprime a saída."""
     print(f"\n🚀 Executando: {' '.join(cmd)}\n")
     try:
-        # Tenta usar o ambiente conda "wop", ou python diretamente
-        # Verificando se o ambiente conda está ativo ou se invocamos via conda run
         full_cmd = ["conda", "run", "-n", "wop", "python", "-m", "pytest"] + cmd[1:]
         result = subprocess.run(full_cmd, capture_output=False, text=True)
         if result.returncode != 0:
-            # Fallback para execução direta
             subprocess.run(cmd)
     except Exception:
         subprocess.run(cmd)
@@ -54,7 +63,6 @@ def main():
             else:
                 print("Opção inválida!")
         elif choice == "3":
-            # Coletar caminhos dos testes e embaralhar
             test_files = [path for _, path in TESTS_MAP.values()]
             random.shuffle(test_files)
             for test_file in test_files:
