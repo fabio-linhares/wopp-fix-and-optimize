@@ -11,12 +11,12 @@
     - [x] Implementar o Método de Dinkelbach Puro.
     - [x] Integrar a Relaxação de Restrições via Penalidade $\ell_1$.
     - [x] Documentar a bilinearidade no regime flexível com McCormick como limitação técnica teórica (Tabela 4 do artigo).
-- [/] **📦 Módulo 4: Protocolo de Benchmarks e Geração de Resultados**
-    - [/] Executar benchmark com redução de GPU.
-    - [/] Executar benchmark sem redução de GPU (Baseline).
-    - [/] Remover a metaheurística autoral de ILS/Tabu.
-    - [/] Adicionar comparação com as tabelas de Santos & Baldotto (2025) e Leal et al. (2025).
-    - [/] Salvar arquivos CSV detalhados.
+- [x] **📦 Módulo 4: Protocolo de Benchmarks e Geração de Resultados**
+    - [x] Executar benchmark com redução de GPU.
+    - [x] Executar benchmark sem redução de GPU (Baseline).
+    - [x] Remover a metaheurística autoral de ILS/Tabu.
+    - [x] Adicionar comparação com as tabelas de Santos & Baldotto (2025) e Leal et al. (2025).
+    - [x] Salvar arquivos CSV detalhados.
 - [ ] **📦 Módulo 5: Artigo Científico e Documentação (Finalização)**
     - [ ] Atualizar o relatório técnico.
     - [ ] Remover a coluna residual `$c_0=1$` da Tabela 4.

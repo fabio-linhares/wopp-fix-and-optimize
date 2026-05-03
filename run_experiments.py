@@ -48,7 +48,7 @@ from src.utils.instance_reducer import InstanceReducer
 
 
 # ═══════════════════════════════════════════════════════════════════
-# Definição das 4 configurações experimentais (conforme o plano atualizado)
+# Definição das configurações experimentais (conforme o plano atualizado)
 # ═══════════════════════════════════════════════════════════════════
 
 CONFIGURATIONS = {
@@ -57,24 +57,42 @@ CONFIGURATIONS = {
         'linearizer': 'inverse',
         'soft_constraints': False,
         'use_c0': False,
+        'instance_reduction': True,
     },
     'C2': {
         'name': 'Inversa + Flexível + Σy≥1',
         'linearizer': 'inverse',
         'soft_constraints': True,
         'use_c0': False,
+        'instance_reduction': True,
     },
     'C5': {
         'name': 'Dinkelbach + Rígido + Σy≥1',
         'linearizer': 'dinkelbach',
         'soft_constraints': False,
         'use_c0': False,
+        'instance_reduction': True,
     },
     'C6': {
         'name': 'Dinkelbach + Flexível + Σy≥1',
         'linearizer': 'dinkelbach',
         'soft_constraints': True,
         'use_c0': False,
+        'instance_reduction': True,
+    },
+    'C1_NoRed': {
+        'name': 'Inversa + Rígido Sem Redução (Baseline)',
+        'linearizer': 'inverse',
+        'soft_constraints': False,
+        'use_c0': False,
+        'instance_reduction': False,
+    },
+    'C5_NoRed': {
+        'name': 'Dinkelbach + Rígido Sem Redução (Baseline)',
+        'linearizer': 'dinkelbach',
+        'soft_constraints': False,
+        'use_c0': False,
+        'instance_reduction': False,
     },
 }
 
@@ -93,6 +111,8 @@ def apply_config(base_config, experiment_cfg):
     if 'algorithm' not in config:
         config['algorithm'] = {}
     config['algorithm']['linearizer'] = experiment_cfg['linearizer']
+    if 'instance_reduction' in experiment_cfg:
+        config['algorithm']['instance_reduction'] = str(experiment_cfg['instance_reduction']).lower()
 
     # Constraints
     if 'constraints' not in config:
@@ -103,6 +123,7 @@ def apply_config(base_config, experiment_cfg):
     if 'objective' not in config:
         config['objective'] = {}
     config['objective']['use_c0'] = experiment_cfg['use_c0']
+
 
     return config
 
@@ -508,8 +529,8 @@ def main():
         help='Medir speedup GPU vs CPU na redução de instância'
     )
     parser.add_argument(
-        '--output', type=str, default='results/experiments.csv',
-        help='Caminho do CSV de saída (default: results/experiments.csv)'
+        '--output', type=str, default='results_v4/experiments_v4.csv',
+        help='Caminho do CSV de saída (default: results_v4/experiments_v4.csv)'
     )
     parser.add_argument(
         '--workers', type=int, default=1,
