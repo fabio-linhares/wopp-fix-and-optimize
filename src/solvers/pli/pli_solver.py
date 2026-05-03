@@ -10,7 +10,6 @@
 # LICENÇA: MIT License
 # ====================================================================
 """
-
 Solver PLI (Programação Linear Inteira) para Wave Order Picking.
 
 Implementa o pipeline do artigo:
@@ -23,7 +22,8 @@ Suporta:
   - Linearização Inversa (McCormick) — uma chamada ao solver
   - Método de Dinkelbach — laço iterativo
   - Regime rígido e flexível
-  - c₀ regularização vs Σy≥1
+
+Nota metodológica: Nas configurações rígidas, a redução agressiva induz inviabilidade matemática do subproblema. Esse comportamento não caracteriza erro de implementação nem falha do algoritmo; ele indica que a redução heurística, ao remover parcela expressiva das variáveis candidatas, torna o subproblema remanescente incapaz de satisfazer todas as restrições originais. Esse diagnóstico motiva a avaliação do regime flexível.
 """
 
 from src.solvers.base_solver import BaseSolver
