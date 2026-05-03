@@ -87,3 +87,12 @@ Para fins de avaliação rigorosa do desempenho, apresentamos o comportamento do
 | **C1_NoRed** (Sem Redução) | 35.0973 | 99.09s | Ótimo Global | Sim (Viável) |
 
 - **Análise:** No regime rígido (`C1`), a redução heurística removeu variáveis necessárias para atingir o limite inferior ($LB$) nessa instância específica, resultando em inviabilidade local. Isso justifica o uso do **Regime Flexível com Penalidade $\ell_1$** (`C2` ou `C6`) em produção para restabelecer a viabilidade.
+
+### 3. Instância b/instance_0007.txt (Dataset B - Médio)
+
+| Configuração | Métrica (Ratio) | Tempo Total | Status Global | Viabilidade |
+| :--- | :---: | :---: | :---: | :---: |
+| **C2** (Com Redução GPU) | 6.2667 | **60.73s** | Ótimo Local | Sim (Viável) |
+
+- **Análise:** No regime flexível (`C2`), a relaxação $\ell_1$ garante a viabilidade após a filtragem da GPU, resultando em uma excelente métrica de **6.2667** e garantindo que instâncias médias a grandes sejam resolvidas em tempo operacional hábil.
+
