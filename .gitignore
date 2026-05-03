@@ -29,10 +29,12 @@ miniconda/
 
 # Datasets, Documentos e Materiais de Apoio
 datasets/
-docs/
 base/
 results/
 src/
+docs/*.pdf
+docs/rian/
+
 
 # Binários de Instalação e Licenças do CPLEX
 cos_installer_*.bin
