@@ -195,15 +195,15 @@ O verdadeiro diferencial da nossa abordagem de **Fix-and-Optimize com GPU** se t
 
 ### 4. Estudo de Caso: Instância B08 (Time vs. Quality)
 
-Para ilustrar de forma concreta a nossa superioridade de tempo de execução frente aos métodos exatos da literatura, contrastamos os resultados empíricos dos artigos com o nosso pipeline na instância `B08` (Dataset B):
+Para ilustrar de forma concreta a nossa superioridade de tempo de execução frente aos métodos exatos da literatura, contrastamos os resultados empíricos dos artigos com o nosso pipeline na instância **B08** (Dataset B, correspondente à **Instância #28** na Tabela 1 de Santos & Baldotto):
 
 | Abordagem | Tempo de Execução | Ratio (Métrica) | Status da Resolução |
 | :--- | :---: | :---: | :---: |
-| **Santos & Baldotto (2025)** | 600s | **111.44** | Timeout (Não Ótimo) |
+| **Santos & Baldotto (2025)** (Instância #28) | 600s | **111.44** | Timeout (Não Ótimo) |
 | **Leal et al. (2025)** | 600s | - | Timeout (Não Ótimo) |
 | **Nosso Pipeline (`C2`)** | **1.94s** | 3.74 | **Ótimo Local (Solução Viável)** |
 
-- **Análise:** O método de Dinkelbach exato de **Santos & Baldotto (2025)** (contido no artigo `galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf`) explora o espaço de busca completo até o timeout de 600s, alcançando a métrica de **111.44**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **3.74** em menos de **2 segundos**. Isso comprova o expressivo speedup (mais de 300x) proporcionado pela nossa matheurística.
+- **Análise:** O método de Dinkelbach exato de **Santos & Baldotto (2025)** (contido no artigo `galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf`) explora o espaço de busca completo até o timeout de 600s na **Instância #28**, alcançando a métrica de **111.44**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **3.74** em menos de **2 segundos**. Isso comprova o expressivo speedup (mais de 300x) proporcionado pela nossa matheurística.
 
 ---
 
