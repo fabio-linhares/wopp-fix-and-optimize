@@ -11,14 +11,16 @@
 # LICENÇA: MIT License
 # ====================================================================
 """
-Redução de instância por GPU (conflito + dominância).
+Operador de redução baseado em dominância aproximada para fixação de variáveis em zero antes da etapa exata.
 
-Implementa as etapas de pré-processamento descritas no artigo:
-1. Representação densa dos corredores por pedido
-2. Matriz de conflito via broadcasting
-3. Score de eficiência S_o / |R_o|
-4. Detecção de dominância vetorizada
-5. Filtragem de pedidos dominados e corredores irrelevantes
+Implementa uma estratégia matheurística inspirada em Fix-and-Optimize:
+1. Representação densa dos corredores por pedido.
+2. Matriz de conflito via broadcasting.
+3. Score de eficiência S_o / |R_o|.
+4. Detecção de dominância vetorizada.
+5. Filtragem de pedidos dominados e corredores irrelevantes (zerando variáveis de decisão no modelo final).
+
+Nota metodológica: A redução não é uma prova de dominância global em todos os casos; ela é uma filtragem heurística orientada à tratabilidade computacional e não garante a preservação do ótimo global.
 
 Pode operar em GPU (CuPy) ou CPU (NumPy) de forma transparente.
 """
