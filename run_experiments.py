@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+# ====================================================================
+# PROJETO: WOPP - Wave Order Picking Problem (SBPO 2026)
+# Universidade Federal de Alagoas (UFAL)
+# Programa de Pós Graduação em Informática - Mestrado (PPGI)
+# DATA DE CRIAÇÃO: 03/05/2026
+# VERSÃO: 1.0.0
+# DESENVOLVEDOR: Fabio Linhares <fl@ic.ufal.br>
+# DESENVOLVEDOR: Cristiano Estumano <ce@ic.ufal.br>
+# LICENÇA: MIT License
+# ====================================================================
+
 """
+
 Benchmark automatizado para o pipeline WOP (Wave Order Picking).
 
 Executa todas as 35 instâncias (20 A + 15 B) com 6 configurações (C1–C6),
