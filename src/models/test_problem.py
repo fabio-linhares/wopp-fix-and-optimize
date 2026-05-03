@@ -3,7 +3,6 @@ import os
 from src.models.problem import WaveOrderPickingProblem
 
 def test_read_valid_instance():
-    # Criar uma instância de teste em um arquivo temporário
     instance_text = """2 3 2
 2 0 10 1 5
 1 2 20
@@ -19,18 +18,13 @@ def test_read_valid_instance():
         problem = WaveOrderPickingProblem()
         problem.read_input(test_file)
         
-        # Testar parsing correto dos limites e dimensões
         assert problem.n_orders == 2
         assert problem.n_items == 3
         assert problem.n_aisles == 2
         assert problem.wave_size_lb == 10
         assert problem.wave_size_ub == 50
-        
-        # Testar dados dos pedidos
         assert problem.orders[0] == {0: 10, 1: 5}
         assert problem.orders[1] == {2: 20}
-        
-        # Testar dados dos corredores
         assert problem.aisles[0] == {0: 100, 1: 50}
         assert problem.aisles[1] == {2: 10}
         
@@ -49,3 +43,16 @@ def test_problem_fallback_preprocess():
     assert problem.item_units_by_aisle[11][1] == 50
     assert problem.item_units_by_order[10][0] == 2
     assert problem.item_units_by_order[11][0] == 3
+
+def test_empty_instance():
+    # Quando arquivo não existe, a função imprime mensagem e retorna self
+    problem = WaveOrderPickingProblem()
+    res = problem.read_input("non_existent_file.txt")
+    assert res is problem
+    assert len(problem.orders) == 0
+
+def test_edge_case_zero_orders():
+    # Uma instância válida porém sem pedidos
+    problem = WaveOrderPickingProblem(orders={}, aisles={}, n_items=0, wave_size_lb=0, wave_size_ub=0)
+    problem._preprocess_sequential()
+    assert len(problem.order_units) == 0
