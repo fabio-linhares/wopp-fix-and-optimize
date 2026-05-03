@@ -79,7 +79,7 @@ def main():
         writer.writeheader()
         writer.writerows(results_list)
 
-    print(f"\n📄 Resultados reais do Loop Benchmark salvos em: {output_path}")
+    print(f"\n📄 Resultados do Loop Benchmark salvos em: {output_path}")
 
 if __name__ == "__main__":
     main()
