@@ -97,7 +97,7 @@ class WaveOrderPickingProblem:
 
         processed_method = "Nenhum"
 
-        if _CUDA_IMPORT_SUCCESSFUL:
+        if _CUDA_IMPORT_SUCCESSFUL and self.n_orders <= 20000:
             try:
         #        print("INFO: Tentando pré-processamento com CUDA...")
                 self._preprocess_cuda()
