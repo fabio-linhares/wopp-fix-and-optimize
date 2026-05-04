@@ -33,9 +33,9 @@ def main():
 
     config = load_config()
     
-    # Ativamos a redução matheurística original e o solver CPLEX
+    # Ativamos a redução matheurística original e o solver CBC (para evitar limites do CPLEX Community)
     config['algorithm']['instance_reduction'] = 'true'
-    config['algorithm']['solver'] = 'CPLEX'
+    config['algorithm']['solver'] = 'CBC'
     config['algorithm']['threads'] = str(os.cpu_count() or 20)
 
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
