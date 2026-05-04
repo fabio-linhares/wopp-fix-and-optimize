@@ -211,13 +211,14 @@ Para ilustrar de forma concreta a nossa superioridade de tempo de execução fre
 Para avaliar o desempenho contínuo do nosso pipeline em comparação aos **589 segundos** gastos pelo método exato de **Leal et al. (2025)** na Instância `B08` (12.334 pedidos), ativamos o **Throughput Mode**. Em vez de parar após exaurir o backlog local, o algoritmo simulou a chegada contínua de novos pedidos na esteira (recarregando a instância assim que os pedidos viáveis se esgotavam) durante exatamente os mesmos 589 segundos.
 
 **Resultados Empíricos Acumulados (589s):**
-- **Total de Pedidos Processados na Esteira:** `26.749`
+- **Tamanho da Instância Original (B08):** `12.334` pedidos
+- **Total de Pedidos Processados na Esteira:** `26.749` (Vazão Total)
 - **Total de Visitas a Corredores:** `30.469`
 - **Ratio Fracionário Médio:** `3.62`
 
 - **A Verdadeira Comparação (Throughput vs. Ratio):** 
 A literatura foca em maximizar estaticamente a densidade de uma única onda gastando quase **10 minutos (589s)**, avaliando 12.334 pedidos para retornar apenas 1 onda (Ratio de 227.1).
-O nosso modelo dinâmico sacrificou a densidade extrema para ganhar uma velocidade massiva. No mesmo intervalo de **589s**, a nossa Matheurística girou o backlog mais de 760 vezes, extraiu os melhores pedidos e montou centenas de ondas operacionais válidas, despachando **26.749 pedidos**.
+O nosso modelo dinâmico sacrificou a densidade extrema para ganhar uma velocidade massiva. No mesmo intervalo de **589s**, a nossa Matheurística girou o backlog mais de 760 vezes, extraiu os melhores pedidos e montou centenas de ondas operacionais válidas, despachando **26.749 pedidos** (o equivalente a esvaziar a capacidade total da instância B08 mais de duas vezes).
 
 Isso comprova empiricamente que a nossa arquitetura de redução em GPU é amplamente superior para operações de e-commerce de alta frequência e tempo real, onde a **Vazão (Throughput)** contínua das esteiras é mais crítica do que a perfeição estática de uma única onda.
 
