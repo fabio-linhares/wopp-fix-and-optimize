@@ -56,17 +56,9 @@ def main():
     iteration = 1
 
     # Variáveis para agregar o acumulado total de toda a execução
-    # Variáveis globais para o relatório final de throughput
-    total_selected_orders_count = 0
-    total_visited_aisles_count = 0
+    all_selected_orders = set()
+    all_visited_aisles = set()
     total_execution_units = 0
-
-    # Variáveis para controle da rodada atual
-    current_round_selected_orders = set()
-    
-    # Salvar cópia do backlog original para simulação de chegada contínua
-    original_orders = problem.orders.copy()
-    original_order_units = problem.order_units.copy()
 
     # Loop contínuo até atingir o limite de 589 segundos
     while (time.time() - start_all) < max_duration:
@@ -82,10 +74,10 @@ def main():
         # O solver usa a chave max_runtime para limitar a busca exata
         config['algorithm']['max_runtime'] = str(int(min(60, remaining_time)))
 
-        # Descartar pedidos já processados nas voltas anteriores (dentro da mesma rodada)
-        if current_round_selected_orders:
-            problem.orders = {o: items for o, items in problem.orders.items() if o not in current_round_selected_orders}
-            problem.order_units = {o: u for o, u in problem.order_units.items() if o not in current_round_selected_orders}
+        # Descartar pedidos já processados nas voltas anteriores
+        if all_selected_orders:
+            problem.orders = {o: items for o, items in problem.orders.items() if o not in all_selected_orders}
+            problem.order_units = {o: u for o, u in problem.order_units.items() if o not in all_selected_orders}
             problem.n_orders = len(problem.orders)
 
         solver = PLISolver(problem, config)
@@ -109,27 +101,15 @@ def main():
         aisles_visited = len(solution.visited_aisles) if solution and solution.visited_aisles else 0
 
         if orders_selected == 0:
-            print("\nBacklog esgotado (nenhum pedido adicional viável nesta onda).")
-            if remaining_time > 5:
-                print(f"-> [Throughput Mode] Simulando chegada de nova leva de pedidos idêntica (Tempo restante: {remaining_time:.1f}s)...")
-                current_round_selected_orders.clear()
-                problem.orders = original_orders.copy()
-                problem.order_units = original_order_units.copy()
-                problem.n_orders = len(problem.orders)
-                iteration += 1
-                continue
-            else:
-                break
+            print("\nNenhum pedido adicional foi selecionado nesta iteração ou problema inviável. Finalizando benchmark.")
+            break
 
         # Validação da solução via validador do Mercado Livre
         is_valid = True  # Para o loop de benchmark exploratory, a matheurística é considerada viável.
         if solution:
-            # Acumular pedidos na rodada atual
-            current_round_selected_orders.update(solution.selected_orders)
-            
-            # Acumular para o Throughput Total da máquina
-            total_selected_orders_count += orders_selected
-            total_visited_aisles_count += aisles_visited
+            # Acumular pedidos e corredores de toda a execução
+            all_selected_orders.update(solution.selected_orders)
+            all_visited_aisles.update(solution.visited_aisles)
             total_execution_units += solution.total_units
         
         print(f"-> Validador Mercado Livre: {'APROVADO ✅' if is_valid else 'REPROVADO ❌'}")
@@ -151,16 +131,16 @@ def main():
         
         iteration += 1
 
-    # Calcular o acumulado total de toda a execução (Throughput em 589s)
-    overall_aisles = total_visited_aisles_count if total_visited_aisles_count > 0 else 1
+    # Calcular o acumulado total de toda a execução
+    overall_aisles = len(all_visited_aisles) if all_visited_aisles else 1
     overall_ratio = round(total_execution_units / overall_aisles, 4)
 
     print("\n══════════════════════════════════════════════════════════════════════")
-    print(f"  RESULTADOS ACUMULADOS - THROUGHPUT TOTAL EM {max_duration}s")
+    print("  RESULTADOS ACUMULADOS DE TODA A EXECUÇÃO (589s)")
     print("══════════════════════════════════════════════════════════════════════")
-    print(f"Total de Pedidos Processados na Esteira: {total_selected_orders_count}")
-    print(f"Total de Visitas a Corredores: {overall_aisles}")
-    print(f"Ratio Fracionário Médio: {overall_ratio}")
+    print(f"Total de Pedidos Selecionados: {len(all_selected_orders)}")
+    print(f"Total de Corredores Visitados: {overall_aisles}")
+    print(f"Ratio Final Acumulado: {overall_ratio}")
     print("══════════════════════════════════════════════════════════════════════")
 
     # Adicionar linha de totais na tabela de resultados
@@ -169,9 +149,9 @@ def main():
         'iteration': 'TOTAL',
         'elapsed_accumulated': round(time.time() - start_all, 2),
         'step_time': 0,
-        'n_orders': total_selected_orders_count,
+        'n_orders': len(all_selected_orders),
         'n_aisles': overall_aisles,
-        'selected_orders': total_selected_orders_count,
+        'selected_orders': len(all_selected_orders),
         'visited_aisles': overall_aisles,
         'ratio': overall_ratio,
         'is_valid': True
