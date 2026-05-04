@@ -220,6 +220,12 @@ No mesmo exato intervalo de 589 segundos, a nossa Matheurística sacrificou a ex
 - **Total de Visitas a Corredores:** `373`
 - **Ratio Fracionário Médio:** `19.83`
 
+- **Métricas de Distância e Percurso:**
+Calculamos métricas operacionais adicionais pós-processamento:
+- **Distância Total Percorrida:** O somatório das distâncias percorridas pelos operadores em todas as ondas.
+- **Distância Média por Pedido:** O percurso necessário em metros por pedido despachado.
+- **Média de Pedidos por Corredor:** A densidade de consolidação das ondas no espaço do armazém.
+
 - **Otimização Operacional (Time Limit por Onda):**
 Nosso pipeline ajusta o tempo máximo de execução por onda para **10 segundos** (em vez dos 60s originais). Essa escolha se baseia na realidade de Centros de Distribuição de alto volume: não faz sentido manter a esteira logísticamente ociosa por 1 minuto calculando uma onda de pedidos com baixa densidade na "cauda longa" do backlog. Ao limitar o solver em 10 segundos na cauda, permitimos que ele devolva a melhor solução viável encontrada naquele intervalo, limpando rapidamente os piores pedidos e maximizando o escoamento global do estoque no mesmo limite de 589s.
 

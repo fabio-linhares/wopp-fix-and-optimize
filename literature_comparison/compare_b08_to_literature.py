@@ -62,6 +62,7 @@ def main():
     all_selected_orders = set()
     all_visited_aisles = set()
     total_execution_units = 0
+    all_waves_aisles = []
 
     # Loop contínuo até atingir o limite de 589 segundos
     while (time.time() - start_all) < max_duration:
@@ -115,6 +116,7 @@ def main():
             all_selected_orders.update(solution.selected_orders)
             all_visited_aisles.update(solution.visited_aisles)
             total_execution_units += solution.total_units
+            all_waves_aisles.append(solution.visited_aisles)
         
         print(f"-> Validador Mercado Livre: {'APROVADO ✅' if is_valid else 'REPROVADO ❌'}")
 
@@ -139,12 +141,32 @@ def main():
     overall_aisles = len(all_visited_aisles) if all_visited_aisles else 1
     overall_ratio = round(total_execution_units / overall_aisles, 4)
 
+    # Calcular métricas de distância de percurso das ondas
+    total_distance = 0.0
+    for wave_aisles in all_waves_aisles:
+        if not wave_aisles:
+            continue
+        sorted_a = sorted(list(wave_aisles))
+        # Distância padrão:
+        # 20m ida/volta do início ao primeiro corredor
+        # 10m por corredor percorrido
+        # 2m entre corredores consecutivos
+        dist = 2 * 20 + (len(sorted_a) * 10) + (sorted_a[-1] - sorted_a[0]) * 2
+        total_distance += dist
+
+    total_orders = len(all_selected_orders)
+    dist_per_order = round(total_distance / total_orders, 2) if total_orders > 0 else 0.0
+    orders_per_aisle = round(total_orders / overall_aisles, 2) if overall_aisles > 0 else 0.0
+
     print("\n══════════════════════════════════════════════════════════════════════")
     print("  RESULTADOS ACUMULADOS DE TODA A EXECUÇÃO (589s)")
     print("══════════════════════════════════════════════════════════════════════")
-    print(f"Total de Pedidos Selecionados: {len(all_selected_orders)}")
+    print(f"Total de Pedidos Selecionados: {total_orders}")
     print(f"Total de Corredores Visitados: {overall_aisles}")
     print(f"Ratio Final Acumulado: {overall_ratio}")
+    print(f"Distância Total Percorrida: {total_distance:.2f} m")
+    print(f"Distância Média por Pedido: {dist_per_order:.2f} m/pedido")
+    print(f"Média de Pedidos por Corredor: {orders_per_aisle:.2f} pedidos/corredor")
     print("══════════════════════════════════════════════════════════════════════")
 
     # Adicionar linha de totais na tabela de resultados
