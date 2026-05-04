@@ -22,6 +22,7 @@ class SolutionValidator:
         # Verificar se o total de unidades está dentro dos limites
         total_units = solution.total_units
         if total_units < problem.wave_size_lb or total_units > problem.wave_size_ub:
+            print(f"DEBUG VALIDATOR: total_units={total_units}, lb={problem.wave_size_lb}, ub={problem.wave_size_ub}")
             return False
         
         # Verificar cobertura de itens
@@ -38,6 +39,7 @@ class SolutionValidator:
         # Cada item necessário deve ter unidades suficientes disponíveis
         for item, quantity_needed in items_needed.items():
             if quantity_needed > items_available.get(item, 0):
+                print(f"DEBUG VALIDATOR coverage: item {item} needed {quantity_needed}, available {items_available.get(item, 0)}")
                 return False
         
         return True
