@@ -78,7 +78,14 @@ class PLISolver(BaseSolver):
         """
         time_limit_int = max(10, int(time_remaining))
 
-        if self.solver_name.upper() == 'CPLEX':
+        if self.solver_name.upper() in ['CPLEX', 'CPLEX_PY']:
+            try:
+                import cplex
+                print("  Usando solver CPLEX via módulo Python (CPLEX_PY)")
+                return pulp.CPLEX_PY(timeLimit=time_limit_int, msg=True)
+            except ImportError:
+                pass
+
             cplex_path = self.config.get('cplex', {}).get('path', '/opt/ibm/ILOG/CPLEX_Studio2212')
             cplex_exec = os.path.join(cplex_path, 'cplex', 'bin', 'x86-64_linux', 'cplex')
 
@@ -108,7 +115,7 @@ class PLISolver(BaseSolver):
                             options=cplex_options,
                         )
                 except Exception as e:
-                    print(f"  CPLEX falhou: {e}. Usando CBC.")
+                    print(f"  CPLEX CMD falhou: {e}. Usando fallback.")
 
         # Fallback: CBC
         print(f"  Usando solver CBC (fallback)")
