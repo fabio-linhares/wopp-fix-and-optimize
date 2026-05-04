@@ -238,9 +238,11 @@ Para fins de comparação justa com o método de Dinkelbach da literatura:
 - **Tempo para processar 6.240 pedidos:**
   - **Nossa Matheurística:** **585 segundos** (9,75 minutos)
   - **Literatura (Dinkelbach):** Cada onda leva 589 segundos para convergir e atinge no máximo o limite superior (UB = 6.120 unidades, cerca de 4.600 pedidos). Para atingir os mesmos 6.240 pedidos, seriam necessários no mínimo 2 ciclos completos de onda, totalizando `2 * 589s = 1.178 segundos` (**19,63 minutos**). A nossa solução faz o escoamento na metade do tempo.
-- **Distância e Percurso Médio:**
-  - **Literatura (Dinkelbach):** Por focar na otimização pura do Ratio, a literatura ativa poucos corredores por onda (cerca de 27). A distância por onda seria de `2 * 20m + (27 * 10m) + (397 * 2m) = 1.104 metros`. Para 2 ondas, o percurso total seria de `2.208 metros` (média de `0,35 m/pedido`). 
-  - **Conclusão:** O método de Dinkelbach minimiza o percurso total por focar na consolidação estática em ondas gigantescas de 10 minutos. Em contrapartida, a nossa Matheurística prioriza a **velocidade máxima de despacho**, liberando o backlog completo duas vezes mais rápido para a esteira do e-commerce.
+- **Distância e Percurso Médio (O Trade-off de Otimização):**
+  - **Nossa Matheurística:** Distância Total Percorrida de `140.158,00 m`, com média de `22,46 m/pedido` e `16,55 pedidos/corredor`.
+  - **Em tese (Onda Única com todos os pedidos):** Se o modelo exato resolvesse todo o backlog de 6.240 pedidos em uma única onda gigante (assumindo que todos cabem no $UB$), o operador visitaria os mesmos 377 corredores da matheurística, mas entraria em cada um **exatamente uma única vez**. A distância teórica percorrida seria de apenas `4.604 metros` (`2*20m + 377*10m + 397*2m`).
+  - **Por que a nossa distância acumulada é maior?** Porque a nossa Matheurística divide o backlog em 72 ondas/viagens menores e rápidas. Isso causa redundância (visitas repetidas aos mesmos corredores em ondas diferentes), acumulando os 140.158 metros ao longo das 72 viagens.
+  - **O Trade-off:** A literatura prioriza a distância mínima teórica (**4.604 metros**), mas trava o armazém por **19,63 minutos** (2 ciclos de 589s). A nossa Matheurística sacrifica a distância total (acumulando **140.158 metros** em 72 viagens separadas) para **ganhar velocidade de escoamento**, processando tudo na metade do tempo (**9,75 minutos**). É a escolha ideal para o tempo real do e-commerce.
 
 ---
 
