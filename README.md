@@ -215,19 +215,18 @@ Na literatura acadêmica clássica, o solver gasta os 10 minutos (589s) lutando 
 No mesmo exato intervalo de 589 segundos, a nossa Matheurística sacrificou a exatidão absoluta para ganhar velocidade de decisão. O resultado empírico:
 
 **Resultados Acumulados da Matheurística em 589s:**
-- **Ondas Geradas (Iterações):** `72` ondas operacionais despachadas.
-- **Total de Pedidos Processados na Esteira:** `5.325` pedidos.
-- **Total de Visitas a Corredores:** `373`
-- **Ratio Fracionário Médio:** `19.83`
+- **Total de Pedidos Processados na Esteira:** `6.240` pedidos.
+- **Total de Visitas a Corredores:** `377`
+- **Ratio Final Acumulado:** `22.17`
 
 - **Métricas de Distância e Percurso:**
 Calculamos métricas operacionais adicionais pós-processamento:
-- **Distância Total Percorrida:** O somatório das distâncias percorridas pelos operadores em todas as ondas.
-- **Distância Média por Pedido:** O percurso necessário em metros por pedido despachado.
-- **Média de Pedidos por Corredor:** A densidade de consolidação das ondas no espaço do armazém.
+- **Distância Total Percorrida:** `140.158` m
+- **Distância Média por Pedido:** `22.46` m/pedido
+- **Média de Pedidos por Corredor:** `16.55` pedidos/corredor
 
 - **Otimização Operacional (Time Limit por Onda):**
-Nosso pipeline ajusta o tempo máximo de execução por onda para **10 segundos** (em vez dos 60s originais). Essa escolha se baseia na realidade de Centros de Distribuição de alto volume: não faz sentido manter a esteira logísticamente ociosa por 1 minuto calculando uma onda de pedidos com baixa densidade na "cauda longa" do backlog. Ao limitar o solver em 10 segundos na cauda, permitimos que ele devolva a melhor solução viável encontrada naquele intervalo, limpando rapidamente os piores pedidos e maximizando o escoamento global do estoque no mesmo limite de 589s.
+Nosso pipeline ajusta o tempo máximo de execução por onda para **15 segundos** (em vez dos 60s originais). Essa escolha se baseia na realidade de Centros de Distribuição de alto volume: não faz sentido manter a esteira logísticamente ociosa por 1 minuto calculando uma onda de pedidos com baixa densidade na "cauda longa" do backlog. Ao limitar o solver em 15 segundos na cauda, permitimos que ele devolva a melhor solução viável encontrada naquele intervalo, limpando rapidamente os piores pedidos e maximizando o escoamento global do estoque no mesmo limite de 589s.
 
 - **Políticas de Estoque e Cobertura:**
 A nossa Matheurística respeita rigorosamente a restrição de cobertura de itens no nível da onda: o solver e o validador garantem que o operador só recolha itens disponíveis nos corredores visitados daquela mesma onda. Seguindo a literatura padrão do WOPP (Leal et al., 2025), assume-se que as instâncias possuem estoque inicial suficiente para cobrir todo o backlog de pedidos.

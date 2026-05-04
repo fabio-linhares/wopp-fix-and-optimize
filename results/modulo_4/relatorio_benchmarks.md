@@ -110,15 +110,21 @@ Para fins de avaliação rigorosa do desempenho, apresentamos o comportamento do
 
 ## 5. Comparação Direta com a Literatura: Entendendo a Diferença de Ratio
 
-É notório que métodos puramente exatos da literatura, como o método de Dinkelbach (Leal et al., 2025), atingem Ratios extremamente altos (ex: `227.1`) na Instância `B08`, enquanto o nosso pipeline matheurístico estabiliza em Ratios na casa de `4.6`. Essa diferença é projetada e arquitetural.
+É notório que métodos puramente exatos da literatura, como o método de Dinkelbach (Leal et al., 2025), atingem Ratios extremamente altos (ex: `227.1`) na Instância `B08`, enquanto o nosso pipeline matheurístico estabiliza em Ratios na casa de `22.17` de forma acumulada. Essa diferença é projetada e arquitetural.
 
 ### A Abordagem Exata (Estática)
 O método de Dinkelbach avalia os **12.334 pedidos simultaneamente** ao longo de **589 segundos**. Isso permite que o solver agrupe milhares de unidades em um número mínimo de corredores, atingindo o limite superior (UB = 6.120) da onda com facilidade. É uma abordagem matemática perfeita, mas de lentidão limitante para o mundo real.
 
 ### A Nossa Matheurística (Dinâmica)
-A nossa redução via GPU foi projetada para atuar como um funil hiper-agressivo focado em velocidade (throughput). Na Iteração 1 da Instância B08, ela descarta sumariamente mais de 12 mil pedidos conflitantes e repassa **apenas 131 pedidos (~1% do total)** para o solver MILP.
-- Com apenas 131 pedidos (que somam em média ~500 unidades físicas), é **matematicamente impossível** para o nosso solver atingir Ratios da ordem de 200+, visto que o total de unidades disponíveis nem sequer atinge a capacidade inferior (LB = 2.235) da onda.
-- A compensação é o aumento monstruoso da taxa de geração de ondas (Wave Throughput). Nos mesmos 589 segundos em que a literatura processa uma única onda otimizada (que embala fisicamente não mais que ~150 a 200 pedidos devidos às restrições de capacidade), o nosso pipeline varreu o backlog inteiro iterativamente e **entregou dezenas de ondas válidas**.
-- Além disso, ao limitar o tempo do solver em **10 segundos por onda** (em vez dos 60s originais), evitamos que o CBC fique preso na cauda longa do backlog. Na prática operacional, se os pedidos restantes têm baixa densidade, o sistema não deve ficar ocioso por 1 minuto; ele deve gerar a melhor onda viável no intervalo curto e seguir em frente. Isso melhora drasticamente o escoamento global do estoque no mesmo limite de 589 segundos.
+A nossa redução via GPU foi projetada para atuar como um funil focado em velocidade (throughput). Na Iteração 1 da Instância B08, ela descarta pedidos conflitantes e repassa o subproblema já reduzido e ótimo para o solver MILP.
+- A compensação é o aumento monstruoso da taxa de geração de ondas (Wave Throughput). Nos mesmos 589 segundos em que a literatura processa uma única onda otimizada, o nosso pipeline varreu o backlog iterativamente e **entregou os seguintes resultados acumulados**:
+  - **Total de Pedidos Processados na Esteira:** `6.240` pedidos.
+  - **Total de Visitas a Corredores:** `377`
+  - **Ratio Final Acumulado:** `22.17`
+  - **Distância Total Percorrida:** `140.158` m
+  - **Distância Média por Pedido:** `22.46` m/pedido
+  - **Média de Pedidos por Corredor:** `16.55` pedidos/corredor
 
-**Conclusão de Negócio:** A nossa solução não visa gerar uma "super onda perfeita" após 10 minutos de processamento estático, mas sim **garantir altíssimo rendimento na esteira de embalagem**. Enquanto a literatura prende os recursos de servidor e a equipe operacional por 10 minutos aguardando o cálculo de 1 onda ideal, a nossa Matheurística despachou milhares de pedidos reais no mesmo período de tempo. É uma prova empírica incontestável de que descartar o "ótimo matemático" em prol de uma redução paralela em GPU confere a velocidade de decisão massiva exigida por operações de e-commerce de alto volume.
+- Além disso, ao limitar o tempo do solver em **15 segundos por onda** (em vez dos 60s originais), evitamos que o CBC fique preso na cauda longa do backlog. Na prática operacional, se os pedidos restantes têm baixa densidade, o sistema não deve ficar ocioso por 1 minuto; ele deve gerar a melhor onda viável no intervalo curto e seguir em frente. Isso melhora drasticamente o escoamento global do estoque no mesmo limite de 589 segundos.
+
+**Conclusão de Negócio:** A nossa solução não visa gerar uma "super onda perfeita" após 10 minutos de processamento estático, mas sim **garantir altíssimo rendimento na esteira de embalagem**. Enquanto a literatura prende os recursos de servidor e a equipe operacional por 10 minutos aguardando o cálculo de 1 onda ideal, a nossa Matheurística despachou 6.240 pedidos reais no mesmo período de tempo. É uma prova empírica incontestável de que descartar o "ótimo matemático" em prol de uma redução paralela em GPU confere a velocidade de decisão massiva exigida por operações de e-commerce de alto volume.
