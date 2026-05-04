@@ -88,6 +88,41 @@ class InstanceReducer:
         if n_orders == 0 or n_aisles == 0:
             return order_ids, aisle_ids, {}
 
+        # Para instâncias gigantescas (ex: > 20k pedidos), evitamos as matrizes O(n²) de dominância
+        # que causam OOM. Em vez disso, fazemos uma filtragem baseada puramente nos melhores scores.
+        if n_orders > 20000:
+            print(f"  ⚠ Instância massiva detectada ({n_orders} pedidos) — usando redução top-scoring para evitar OOM")
+            t0 = time.time()
+            item_to_aisles = {}
+            for a_idx, a_id in enumerate(aisle_ids):
+                for item_id in aisles[a_id]:
+                    if item_id not in item_to_aisles:
+                        item_to_aisles[item_id] = []
+                    item_to_aisles[item_id].append(a_id)
+
+            order_scores = []
+            for o_id in order_ids:
+                relevant_aisles = set()
+                for item_id in orders[o_id]:
+                    if item_id in item_to_aisles:
+                        relevant_aisles.update(item_to_aisles[item_id])
+                u = order_units.get(o_id, 0)
+                n_corr = max(len(relevant_aisles), 1)
+                order_scores.append((o_id, u / n_corr))
+
+            order_scores.sort(key=lambda x: x[1], reverse=True)
+            kept_order_ids = [o_id for o_id, s in order_scores[:1000]]
+            
+            kept_aisle_ids = set()
+            for o_id in kept_order_ids:
+                for item_id in orders[o_id]:
+                    if item_id in item_to_aisles:
+                        kept_aisle_ids.update(item_to_aisles[item_id])
+
+            self.timings['dense_matrix'] = time.time() - t0
+            self.timings['TOTAL'] = time.time() - total_start
+            return kept_order_ids, sorted(list(kept_aisle_ids)), self.timings
+
         # ─── Etapa 1: Mapear corredores necessários por pedido ───
         t0 = time.time()
 
