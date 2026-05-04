@@ -28,6 +28,7 @@ class GPUManager:
         
         # Verificar se os dados já estão na GPU
         reuse_existing = hasattr(self.problem, '_gpu_item_order_map') and \
+                       self.problem._gpu_item_order_map is not None and \
                        hasattr(self.problem, '_gpu_item_aisle_map')
         
         # Inicializar dicionário de dados GPU
@@ -37,12 +38,20 @@ class GPUManager:
             # Copiar matrizes existentes
             self.gpu_data['item_order_matrix'] = self.problem._gpu_item_order_map
             self.gpu_data['item_aisle_matrix'] = self.problem._gpu_item_aisle_map
+        elif hasattr(self.problem, '_cpu_item_order_map'):
+            # Matriz CPU existente mas grande demais para transferir completa.
+            # Vamos usar a matriz CPU diretamente para calcular as demandas de forma particionada.
+            self.gpu_data['item_order_matrix'] = None
+            self.gpu_data['item_aisle_matrix'] = cp.asarray(self.problem._cpu_item_aisle_map)
+        else:
+            self.gpu_data['item_order_matrix'] = cp.array(self._create_item_order_matrix())
+            self.gpu_data['item_aisle_matrix'] = cp.array(self._create_item_aisle_matrix())
             
-            # Criar array de unidades por pedido na GPU (faltava essa inicialização)
-            self.gpu_data['order_units'] = cp.array(
-                [self.problem.order_units.get(o, 0) for o in range(self.problem.n_orders)],
-                dtype=cp.float32
-            )
+        # Criar array de unidades por pedido na GPU
+        self.gpu_data['order_units'] = cp.array(
+            [self.problem.order_units.get(o, 0) for o in range(self.problem.n_orders)],
+            dtype=cp.float32
+        )
             
             # Adicionar outros dados necessários
             self.gpu_data['n_orders'] = self.problem.n_orders
@@ -140,7 +149,18 @@ class GPUManager:
         
         # Restrição de cobertura de itens
         # Calcular demanda total de itens para pedidos selecionados
-        item_demand = cp.matmul(self.gpu_data['item_order_matrix'], orders_mask)
+        if self.gpu_data.get('item_order_matrix') is not None:
+            item_demand = cp.matmul(self.gpu_data['item_order_matrix'], orders_mask)
+        else:
+            item_demand = cp.zeros(self.problem.n_items, dtype=cp.float32)
+            if hasattr(self.problem, '_cpu_item_order_map'):
+                chunk_size = 10000
+                for start in range(0, self.problem.n_orders, chunk_size):
+                    end = min(start + chunk_size, self.problem.n_orders)
+                    chunk_gpu = cp.asarray(self.problem._cpu_item_order_map[:, start:end])
+                    mask_chunk = orders_mask[start:end]
+                    item_demand += cp.matmul(chunk_gpu, mask_chunk)
+                    del chunk_gpu
         
         # Calcular disponibilidade total de itens em corredores selecionados
         item_supply = cp.matmul(self.gpu_data['item_aisle_matrix'], aisles_mask)
