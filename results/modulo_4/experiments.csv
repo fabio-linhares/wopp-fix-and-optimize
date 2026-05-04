@@ -1,3 +1,0 @@
-config_id,config_name,instance,instance_path,n_orders_original,n_aisles_original,n_orders_reduced,n_aisles_reduced,official_metric,n_selected_orders,n_visited_aisles,total_units,is_feasible,solver_status,time_total,time_reduction,time_solver,error,dataset
-C1,Inversa + Rígido + Σy≥1,instance_0001.txt,datasets/a/instance_0001.txt,61,116,0,0,4.428571,5,7,31,True,optimal,0.5315,0.0,0.0,,A
-C2,Inversa + Flexível + Σy≥1,instance_0001.txt,datasets/a/instance_0001.txt,61,116,0,0,4.428571,5,7,31,True,optimal,0.3853,0.0,0.0,,A
