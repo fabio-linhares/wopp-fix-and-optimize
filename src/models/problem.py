@@ -219,25 +219,13 @@ class WaveOrderPickingProblem:
                     self.item_units_by_aisle[item_id_val][aisle_id_val] = quantity
         
         self.item_units_by_order.clear()
-        def process_order_items(order_id_val, items_val):
-            local_order_items = {}
-            for item_id_val, quantity in items_val.items():
-                local_order_items[item_id_val] = quantity
-            return order_id_val, local_order_items
+        for oid, items in self.orders.items():
+            for item_id_val, quantity in items.items():
+                self.item_units_by_order[item_id_val][oid] = quantity
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures_orders = [executor.submit(process_order_items, oid, self.orders[oid]) for oid in self.orders.keys()]
-            for future in concurrent.futures.as_completed(futures_orders):
-                order_id_val, processed_items = future.result()
-                for item_id_val, quantity in processed_items.items():
-                    self.item_units_by_order[item_id_val][order_id_val] = quantity
-        
         self.order_units.clear()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures_units = {executor.submit(lambda o_items: sum(o_items.values()), self.orders[oid]): oid for oid in self.orders.keys()}
-            for future in concurrent.futures.as_completed(futures_units):
-                oid = futures_units[future]
-                self.order_units[oid] = future.result()
+        for oid, items in self.orders.items():
+            self.order_units[oid] = sum(items.values())
     
     def _preprocess_sequential(self):
         """Fallback para processamento sequencial caso os métodos paralelos falhem."""
