@@ -16,6 +16,7 @@ import sys
 import os
 import time
 import csv
+from datetime import datetime
 
 # Adicionar raiz do projeto ao path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -48,6 +49,7 @@ def main():
     problem = WaveOrderPickingProblem(config=config)
     problem.read_input(instance_path)
 
+    exec_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     results_list = []
     start_all = time.time()
     max_duration = 589.0
@@ -113,6 +115,7 @@ def main():
         print(f"-> Validador Mercado Livre: {'APROVADO ✅' if is_valid else 'REPROVADO ❌'}")
 
         results_list.append({
+            'datetime': exec_datetime,
             'iteration': iteration,
             'elapsed_accumulated': round(time.time() - start_all, 2),
             'step_time': round(step_elapsed, 4),
@@ -142,6 +145,7 @@ def main():
 
     # Adicionar linha de totais na tabela de resultados
     results_list.append({
+        'datetime': exec_datetime,
         'iteration': 'TOTAL',
         'elapsed_accumulated': round(time.time() - start_all, 2),
         'step_time': 0,
@@ -155,9 +159,12 @@ def main():
 
     output_path = os.path.join(root_dir, "results/modulo_4/loop_benchmark_results.csv")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, 'w', newline='', encoding='utf-8') as f:
+    file_exists = os.path.exists(output_path) and os.path.getsize(output_path) > 0
+
+    with open(output_path, 'a', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=results_list[0].keys())
-        writer.writeheader()
+        if not file_exists:
+            writer.writeheader()
         writer.writerows(results_list)
 
     print(f"\n📄 Resultados do Loop Benchmark salvos em: {output_path}")
