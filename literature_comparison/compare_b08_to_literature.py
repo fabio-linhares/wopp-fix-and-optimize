@@ -87,7 +87,7 @@ def main():
 
         # Caso o CPLEX instalado no ambiente seja a Community Edition,
         # haverá uma restrição de tamanho de problema. Se falhar, usamos fallback automático para CBC.
-        if solution is None or not solution.selected_orders:
+        if config['algorithm']['solver'].upper() in ['CPLEX', 'CPLEX_PY'] and (solution is None or not solution.selected_orders):
             print("-> CPLEX falhou (limite de licença da Community Edition excedido). Usando solver CBC de fallback real...")
             config['algorithm']['solver'] = 'CBC'
             solver = PLISolver(problem, config)
