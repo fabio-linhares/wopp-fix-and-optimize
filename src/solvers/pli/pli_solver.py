@@ -119,7 +119,9 @@ class PLISolver(BaseSolver):
 
         # Fallback: CBC
         print(f"  Usando solver CBC (fallback)")
-        return pulp.PULP_CBC_CMD(timeLimit=time_limit_int, msg=False, threads=4)
+        import os
+        num_threads = max(1, os.cpu_count() or 4)
+        return pulp.PULP_CBC_CMD(timeLimit=time_limit_int, msg=False, threads=num_threads)
 
     def _find_cplex(self):
         """Procura executável CPLEX em locais comuns."""

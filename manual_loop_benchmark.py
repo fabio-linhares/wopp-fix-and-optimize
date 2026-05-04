@@ -24,6 +24,7 @@ def main():
     # Ativamos a redução matheurística original e o solver CPLEX
     config['algorithm']['instance_reduction'] = 'true'
     config['algorithm']['solver'] = 'CPLEX'
+    config['algorithm']['threads'] = str(os.cpu_count() or 20)
 
     instance_path = "datasets/b/instance_0008.txt"
 
