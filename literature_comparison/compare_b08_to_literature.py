@@ -76,8 +76,8 @@ def main():
         print(f"\n[Iteração {iteration}] Tempo acumulado: {current_elapsed:.2f}s / {max_duration}s")
         
         # O solver usa a chave max_runtime para limitar a busca exata.
-        # Reduzimos para 10s para evitar que o CBC fique preso na cauda longa (pedidos de baixa qualidade).
-        config['algorithm']['max_runtime'] = str(int(min(10, remaining_time)))
+        # Reduzimos para 15s para evitar que o CBC fique preso na cauda longa (pedidos de baixa qualidade).
+        config['algorithm']['max_runtime'] = str(int(min(15, remaining_time)))
 
         # Descartar pedidos já processados nas voltas anteriores
         if all_selected_orders:

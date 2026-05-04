@@ -202,7 +202,7 @@ class PLISolver(BaseSolver):
         # Verificar tempo
         elapsed = time.time() - start_time
         remaining = self.time_limit - elapsed
-        if remaining < 10:
+        if remaining < 1:
             print("  Timeout após redução de instância")
             return p.create_solution([], [])
 
