@@ -229,8 +229,10 @@ Calculamos métricas operacionais adicionais pós-processamento:
 - **Otimização Operacional (Time Limit por Onda):**
 Nosso pipeline ajusta o tempo máximo de execução por onda para **10 segundos** (em vez dos 60s originais). Essa escolha se baseia na realidade de Centros de Distribuição de alto volume: não faz sentido manter a esteira logísticamente ociosa por 1 minuto calculando uma onda de pedidos com baixa densidade na "cauda longa" do backlog. Ao limitar o solver em 10 segundos na cauda, permitimos que ele devolva a melhor solução viável encontrada naquele intervalo, limpando rapidamente os piores pedidos e maximizando o escoamento global do estoque no mesmo limite de 589s.
 
-Isso comprova uma **vantagem logística massiva**: enquanto a literatura "trava" os recursos computacionais do armazém por 10 minutos aguardando o cálculo de 1 onda ideal de ~150 pedidos, a nossa solução entrega dezenas de ondas válidas e despacha milhares de pedidos no mesmo período. É um sistema construído explicitamente para a velocidade e escalabilidade exigidas pelo tempo real do e-commerce.
+- **Políticas de Estoque e Cobertura:**
+A nossa Matheurística respeita rigorosamente a restrição de cobertura de itens no nível da onda: o solver e o validador garantem que o operador só recolha itens disponíveis nos corredores visitados daquela mesma onda. Seguindo a literatura padrão do WOPP (Leal et al., 2025), assume-se que as instâncias possuem estoque inicial suficiente para cobrir todo o backlog de pedidos.
 
+Isso comprova uma **vantagem logística massiva**: enquanto a literatura "trava" os recursos computacionais do armazém por 10 minutos aguardando o cálculo de 1 onda ideal de ~150 pedidos, a nossa solução entrega dezenas de ondas válidas e despacha milhares de pedidos no mesmo período. É um sistema construído explicitamente para a velocidade e escalabilidade exigidas pelo tempo real do e-commerce.
 
 ---
 
