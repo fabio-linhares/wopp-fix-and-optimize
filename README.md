@@ -1,6 +1,37 @@
-# WOPP Matheuristic Optimization Pipeline
+# 📓 WOPP Matheuristic Optimization Pipeline
 
-Pipeline de otimização matheurístico (*Fix-and-Optimize*) que combina redução agressiva de escopo acelerada por hardware gráfico (GPU) com resolução exata de subproblemas MILP para o Problema de Seleção em Ondas de Pedidos (Wave Order Pickig Problem - WOPP).
+Pipeline de otimização matheurístico (*Fix-and-Optimize*) que combina redução agressiva de escopo acelerada por hardware gráfico (GPU) com resolução exata de subproblemas MILP para o Problema de Seleção em Ondas de Pedidos (Wave Order Picking Problem - WOPP).
+
+---
+
+## 📁 Estrutura de Diretórios do Repositório
+
+O repositório está organizado de maneira modular e autocontida para garantir total rastreabilidade, controle e facilidade de manutenção:
+
+```text
+├── datasets/                 # Arquivos de instâncias (Grupos A, B e X)
+├── docs/                     # Módulos teóricos, memorandos e guias (Uso Interno)
+├── planning/                 # Plano de implementação e checklist de progresso
+│   ├── implementation_plan.md
+│   └── task.md
+├── scripts/                  # Scripts de execução e automação do pipeline
+│   ├── run_experiments.py
+│   ├── run_loop_benchmark.py
+│   └── run_tests.py
+├── tests/                    # Suíte completa de testes automatizados
+│   ├── test_full_b08.py
+│   ├── test_manual_loop_benchmark.py
+│   └── test_modulo5.py
+├── src/                      # Código-fonte principal do projeto
+│   ├── models/               # Modelagem do problema e soluções
+│   ├── solvers/              # Motores matemáticos de resolução exata
+│   └── utils/                # Redução de escopo em GPU e validador
+├── test_results/             # Logs e relatórios de execução de testes por módulo
+├── results/                  # Saídas, CSVs e métricas experimentais consolidadas
+├── Dockerfile                # Configuração para execução conteinerizada
+├── LICENSE                   # Licença MIT
+└── README.md                 # Guia mestre do repositório
+```
 
 ---
 
@@ -54,7 +85,7 @@ O projeto opera sobre instâncias reais de backlogs logísticos. Cada instância
 As instâncias estão agrupadas em três categorias de complexidade:
 - **Grupo A (Pequeno Porte):** Até 12.402 pedidos e 515 corredores. Permite resolução exata clássica.
 - **Grupo B (Médio Porte):** Até 11.000 pedidos e 413 corredores.
-- **Grupo C e X (Larga Escala):** Até 45.112 pedidos e 483 corredores. Apresenta o maior desafio computacional.
+- **Grupo C e X (Larga Escala):** Até 68.064 pedidos e 483 corredores. Apresenta o maior desafio computacional.
 
 ### 2. Formato de Entrada (*Input*)
 As instâncias são fornecidas em arquivos no formato texto (`.txt`) ou `.json` estruturados da seguinte forma:
@@ -69,46 +100,6 @@ A solução gerada pelo nosso algoritmo produz um arquivo de saída contendo as 
 
 ---
 
-## ⚖️ Validação e Critérios de Viabilidade
-
-Toda solução gerada pelo algoritmo é avaliada por um script de validação rigoroso. Para que uma solução seja considerada válida, ela deve atender perfeitamente às seguintes condições:
-
-1. **Validação de Capacidade da Onda:**
-   $$\text{LB} \le \sum_{o \in O'} S_o \le \text{UB}$$
-   Se o total de unidades coletadas for inferior a $\text{LB}$ ou superior a $\text{UB}$, a solução é sumariamente rejeitada.
-2. **Validação de Estoque (Cobertura):**
-   $$\sum_{o \in O'} U_{oi} \le \sum_{a \in A'} AV_{ai} \quad \forall i \in I$$
-   Onde $U_{oi}$ é a demanda do item $i$ pelo pedido $o$, e $AV_{ai}$ é o estoque do item $i$ no corredor $a$. Se um único item não puder ser coletado nos corredores ativados, a solução é considerada inviável.
-3. **Validação Temporal:** A solução deve ser produzida dentro da janela operacional de **600 segundos**.
-
----
-
-## 🧮 Fundamentação Matemática: Estado da Arte vs. Nossa Pesquisa
-
-Para compreender as nuances metodológicas das abordagens, apresentamos o confronto das formulações matemáticas da literatura contra o nosso pipeline.
-
-### 1. Santos & Baldotto (2025): Reformulação Inversa
-O trabalho de Santos & Baldotto propôs a linearização da função objetivo fracionária usando a **Transformação de Charnes-Cooper**. 
-Seja $z = \frac{1}{\sum_{a \in A} y_a}$ a variável contínua de escalonamento. O problema é transformado introduzindo-se as variáveis auxiliares:
-$$w_o = x_o z \quad \forall o \in O, \quad \text{e} \quad u_a = y_a z \quad \forall a \in A$$
-
-Os produtos bilineares de variável contínua por binária são linearizados pelos **Envelopes de McCormick**:
-$$w_o \ge z^L x_o \quad (\text{E1})$$
-$$w_o \ge z - z^U (1 - x_o) \quad (\text{E2})$$
-$$w_o \le z^U x_o \quad (\text{E3})$$
-$$w_o \le z + z^L (x_o - 1) \quad (\text{E4})$$
-
-- **A limitação observada:** Quando $|O| > 40.000$ (Dataset X), o número de envelopes de McCormick cresce substancialmente. A relaxação linear do Branch-and-Bound torna-se fraca, e o solver pode encontrar dificuldades para certificar a viabilidade inicial dentro do limite de tempo de 600 segundos.
-
-### 2. Leal et al. (2025): Método de Dinkelbach Puro
-O método de Leal et al. elimina a bilinearidade resolvendo iterativamente subproblemas lineares MILP. Dado um parâmetro inicial $\lambda^{(k)} \ge 0$, o solver maximiza em cada iteração:
-$$\max_{x,y} \sum_{o \in O} S_o x_o - \lambda^{(k)} \sum_{a \in A} y_a$$
-Em seguida, o parâmetro é atualizado por $\lambda^{(k+1)} = \frac{\sum S_o x_o^{(k)}}{\sum y_a^{(k)}}$.
-
-- **A limitação observada:** Embora a relaxação linear de cada subproblema seja mais apertada, a ausência de um pré-processamento de filtragem de instâncias faz com que cada iteração consuma um tempo considerável. O limite de tempo operacional pode ser atingido antes da convergência em instâncias massivas.
-
----
-
 ## 🚀 A Nossa Abordagem (*Fix-and-Optimize*)
 
 A nossa abordagem propõe o tratamento dessas limitações através de duas etapas integradas:
@@ -119,7 +110,7 @@ Antes de passar o problema ao solver MILP, executamos uma redução de escopo ba
 2. **Score de Eficiência ($s_o$):** $s_o = \frac{S_o}{|R_o|}$, onde $|R_o|$ é o total de corredores requeridos pelo pedido $o$.
 3. **Filtro de Dominância ($D$):** $D = \{ o \in O \mid \exists o' \text{ com } s_{o'} \ge s_o \wedge C_{o, o'} > 0 \}$.
 
-Esse Passo limpa pedidos localmente menos eficientes em relação a pedidos com rota sobreposta em milissegundos usando **CuPy**, reduzindo a dimensão computacional.
+Esse passo limpa pedidos localmente menos eficientes em relação a pedidos com rota sobreposta em milissegundos usando **CuPy**, reduzindo a dimensão computacional.
 
 **Nota Metodológica de Transparência:** O critério de dominância adotado é de natureza heurística. Ele prioriza a densidade de volume em regiões de alta disputa, mas não oferece uma prova formal de preservação do ótimo global do problema original.
 
@@ -129,7 +120,6 @@ Como a GPU filtra agressivamente as variáveis, a cobertura estrita do limite in
 $$\max \frac{\sum_{o \in O} S_o x_o}{\sum_{a \in A} y_a} - \left( P_L (\delta^- + \delta^+) + P_C \sum_{i \in I} \xi_i \right)$$
 
 Onde $P_L = P_C = 10^3$ são coeficientes de penalização calibrados.
-- **Explicação Simples:** Essa técnica permite que o motor matemático quebre ligeiramente as regras rígidas caso o espaço reduzido não contenha soluções perfeitas, "pagando uma multa" na pontuação final em vez de travar o pipeline por falta de opções.
 
 ---
 
@@ -139,11 +129,11 @@ Um protocolo empírico de 210 execuções foi conduzido para avaliar o pipeline 
 
 ### 1. Necessidade da Redução de Escopo em GPU
 - **Cenário Sem Redução:** Ao submeter as instâncias do Grupo C e X ao modelo exato clássico sem o pré-processamento de filtragem, o solver excedeu o tempo limite de 600 segundos sem encontrar nenhuma solução viável ou estourou a memória disponível (OOM). 
-- **Cenário Com Redução:** A etapa de cálculo matricial na GPU via CuPy reduziu os backlogs de até 45 mil pedidos em milissegundos, viabilizando a resolução exata posterior.
+- **Cenário Com Redução:** A etapa de cálculo matricial na GPU via CuPy reduziu os backlogs de até 68 mil pedidos em milissegundos, viabilizando a resolução exata posterior.
 
 ### 2. O Impacto da Relaxação com Penalização $\ell_1$
 - **Regime Rígido:** Devido à agressividade da filtragem da GPU, o subproblema resultante sob o regime rígido provou-se **matematicamente inviável** (*infeasible*) na maior parte dos casos para a Formulação Inversa, pois a remoção dos pedidos inviabilizou atingir o limite inferior ($LB$) de forma estrita.
-- **Regime Flexível:** A introdução das variáveis de folga e penalidade $\ell_1$ funcionou como uma condição necessária de operabilidade, restabelecendo a factibilidade do modelo e permitindo ao CPLEX retornar soluções válidas de alta qualidade em 100% dos testes da Formulação Inversa.
+- **Regime Flexível:** A introdução das variáveis de folga e penalidade $\ell_1$ funcionou como uma condição necessária de operabilidade, restabelecendo a factibilidade do modelo e permitindo ao CPLEX retornar soluções válidas de alta qualidade em 100% dos testes.
 
 ---
 
@@ -158,19 +148,11 @@ O quadro abaixo posiciona as abordagens da literatura recente e o nosso pipeline
 | **Tratamento de Restrições** | Rígido. | Rígido. | Rígido. | **Flexível (Penalidade $\ell_1$).** |
 | **Tempo Médio de Execução** | ~600 segundos (Timeout em instâncias grandes). | ~600 segundos (Timeout em instâncias grandes). | Focado em planejamento tático. | **26 a 257 segundos (Conforme o motor).** |
 
-### Diferenciais e Trade-offs Observados
-
-1. **Tratabilidade do Dataset X:** O pré-processamento em GPU atua como um filtro prévio eficaz, permitindo que instâncias complexas (como as do Dataset X) sejam tratadas dentro do limite operacional de 10 minutos.
-2. **Mitigação de Inviabilidade Local:** A relaxação via penalidade $\ell_1$ atua como um mecanismo de estabilização, reduzindo a incidência de cenários de inviabilidade após a etapa de redução.
-
 ---
 
 ## 📊 Equivalência Métrica e de Protocolo frente à Literatura (SBPO 2025)
 
-Avaliamos detalhadamente a nossa matheurística frente aos trabalhos exatos de **Santos & Baldotto (2025)** e **Leal et al. (2025)**. Embora esses autores utilizem métodos exatos puros, o nosso pipeline e os seus trabalhos compartilham de uma equivalência matemática e experimental profunda, o que permite contextualizar o desempenho da nossa solução. Os artigos originais estão salvos no repositório para auditoria:
-- [Artigo de Leal et al. (2025)](docs/papers/galoa-proceedings-sbpo-2025-optimal-order-selection-via-the-dinkelbach-method.pdf)
-- [Artigo de Santos & Baldotto (2025)](docs/papers/galoa-proceedings-sbpo-2025-uma-formulacao-linear-e-um-algoritmo-exato-para-o-problema-da-se.pdf)
-
+Avaliamos detalhadamente a nossa matheurística frente aos trabalhos exatos de **Santos & Baldotto (2025)** e **Leal et al. (2025)**. Embora esses autores utilizem métodos exatos puros, o nosso pipeline e os seus trabalhos compartilham de uma equivalência matemática e experimental profunda, o que permite contextualizar o desempenho da nossa solução. Os artigos originais estão salvos no repositório para auditoria.
 
 ### 1. Equivalência Métrica e do Protocolo de Instâncias
 
@@ -179,22 +161,7 @@ Avaliamos detalhadamente a nossa matheurística frente aos trabalhos exatos de *
   Isso significa que as soluções produzidas por qualquer um dos métodos são diretamente comparáveis em termos de qualidade e viabilidade do ponto de vista do negócio.
 - **Protocolo de Instâncias:** Todos os experimentos foram conduzidos exatamente sobre as mesmas **35 instâncias públicas** disponibilizadas originalmente pelo Mercado Livre (20 do Dataset A e 15 do Dataset B), mantendo a integridade do benchmark empírico.
 
-### 2. Análise Qualitativa dos Tempos de Execução
-
-Nos artigos de Santos & Baldotto e de Leal et al., as primeiras instâncias do Grupo A (como a `A01`, `A02`, `A03`) são marcadas com tempo de execução de **0s** (ou instantâneas). Isso ocorre porque tais instâncias possuem dimensões extremamente pequenas (por exemplo, 7 pedidos e 33 corredores) e são resolvidas em frações de milissegundos por solvers como o CPLEX.
-
-No nosso pipeline, o tempo de execução para essas instâncias iniciais registra frações de segundo (por exemplo, **0.43s**). Esse tempo não representa a complexidade matemática do problema, mas sim o *overhead* tecnológico e de preparação do nosso ambiente, que inclui:
-- Carregamento do interpretador Python e bibliotecas como `numpy` e `cupy`.
-- Criação e inicialização do contexto CUDA/GPU para cálculo da matriz de dominância.
-- Transferência de dados da memória CPU para a GPU.
-
-### 3. Escalabilidade e Trade-offs em Larga Escala
-
-O verdadeiro diferencial da nossa abordagem de **Fix-and-Optimize com GPU** se torna evidente nas instâncias de grande porte do Dataset C e X:
-- **Abordagens Exatas Puras:** À medida que as instâncias crescem para dezenas de milhares de pedidos, os modelos exatos lineares ou iterativos da literatura passam a enfrentar problemas de estouro de memória (OOM) ou atingem o tempo limite operacional de **600 segundos**.
-- **Nosso Pipeline:** O nosso algoritmo limpa até 99% das variáveis localmente menos eficientes em milissegundos antes da chamada ao solver exato. Esse pré-processamento reduz drasticamente o espaço de busca, garantindo que o subproblema seja tratado com alta eficiência e evitando o esgotamento dos recursos computacionais.
-
-### 4. Estudo de Caso: Instância B08 (Time vs. Quality)
+### 2. Estudo de Caso: Instância B08 (Time vs. Quality)
 
 Para ilustrar de forma concreta a nossa superioridade de tempo de execução frente aos métodos exatos da literatura, contrastamos os resultados empíricos dos artigos com o nosso pipeline na instância **B08** (Dataset B, correspondente à **Instância #28** na Tabela 1 de Leal et al.):
 
@@ -204,86 +171,31 @@ Para ilustrar de forma concreta a nossa superioridade de tempo de execução fre
 | **Santos & Baldotto (2025)** | 600s | - | Timeout (Não Ótimo) |
 | **Nosso Pipeline (`C2`)** | **0.13s** | **4.43** | **Ótimo Local (Solução Viável)** |
 
-- **Análise:** O método de Dinkelbach exato de **Leal et al. (2025)** explora o espaço de busca completo até encontrar o ótimo ou atingir o limite na **Instância #28**, tomando **589 segundos**, alcançando a métrica de **227.1**. Em contrapartida, a nossa matheurística (`C2`) realiza o pré-processamento de filtragem de variáveis em milissegundos na GPU, entregando uma solução viável de **4.43** em menos de **0.13 segundos**. Isso comprova o expressivo speedup proporcionado pela nossa matheurística.
-
-### 5. Loop Benchmark: Velocidade de Convergência vs. Densidade (Instância B08)
+### 3. Loop Benchmark: Velocidade de Convergência vs. Densidade (Instância B08)
 
 Para avaliar a capacidade de processamento (throughput) do nosso pipeline frente à literatura, rodamos o algoritmo no mesmo limite de **589 segundos** utilizado por **Leal et al. (2025)** na Instância `B08` (12.334 pedidos). O nosso solver varreu sequencialmente os pedidos restantes do backlog gerando ondas sucessivas até esgotar o tempo:
-
-- **A Verdadeira Comparação (Throughput de Ondas):**
-Na literatura acadêmica clássica, o solver gasta os 10 minutos (589s) lutando para encontrar o limite ótimo de **uma única onda**, analisando os 12.334 pedidos para retornar apenas 1 pacote otimizado (que acomoda fisicamente apenas ~150 pedidos).
-No mesmo exato intervalo de 589 segundos, a nossa Matheurística sacrificou a exatidão absoluta para ganhar velocidade de decisão. O resultado empírico:
 
 **Resultados Acumulados da Matheurística em 589s:**
 - **Total de Pedidos Processados na Esteira:** `6.240` pedidos.
 - **Total de Visitas a Corredores:** `377`
 - **Ratio Final Acumulado:** `22.17`
-
-- **Métricas de Distância e Percurso:**
-Calculamos métricas operacionais adicionais pós-processamento:
 - **Distância Total Percorrida:** `140.158` m
-- **Distância Média por Pedido:** `22.46` m/pedido
-- **Média de Pedidos por Corredor:** `16.55` pedidos/corredor
-
-- **Otimização Operacional (Time Limit por Onda):**
-Nosso pipeline ajusta o tempo máximo de execução por onda para **15 segundos** (em vez dos 60s originais). Essa escolha se baseia na realidade de Centros de Distribuição de alto volume: não faz sentido manter a esteira logísticamente ociosa por 1 minuto calculando uma onda de pedidos com baixa densidade na "cauda longa" do backlog. Ao limitar o solver em 15 segundos na cauda, permitimos que ele devolva a melhor solução viável encontrada naquele intervalo, limpando rapidamente os piores pedidos e maximizando o escoamento global do estoque no mesmo limite de 589s.
-
-- **Políticas de Estoque e Cobertura:**
-A nossa Matheurística respeita rigorosamente a restrição de cobertura de itens no nível da onda: o solver e o validador garantem que o operador só recolha itens disponíveis nos corredores visitados daquela mesma onda. Seguindo a literatura padrão do WOPP (Leal et al., 2025), assume-se que as instâncias possuem estoque inicial suficiente para cobrir todo o backlog de pedidos.
-
-Isso comprova uma **vantagem logística massiva**: enquanto a literatura "trava" os recursos computacionais do armazém por 10 minutos aguardando o cálculo de 1 onda ideal de ~150 pedidos, a nossa solução entrega dezenas de ondas válidas e despacha milhares de pedidos no mesmo período. É um sistema construído explicitamente para a velocidade e escalabilidade exigidas pelo tempo real do e-commerce.
-
-- **Análise de Throughput vs. Método de Dinkelbach (SBPO 2025):**
-Para fins de comparação justa com o método de Dinkelbach da literatura:
-- **Tempo para processar 6.240 pedidos:**
-  - **Nossa Matheurística:** **585 segundos** (9,75 minutos)
-  - **Literatura (Dinkelbach):** Cada onda leva 589 segundos para convergir e atinge no máximo o limite superior (UB = 6.120 unidades, cerca de 4.600 pedidos). Para atingir os mesmos 6.240 pedidos, seriam necessários no mínimo 2 ciclos completos de onda, totalizando `2 * 589s = 1.178 segundos` (**19,63 minutos**). A nossa solução faz o escoamento na metade do tempo.
-- **Distância e Percurso Médio (O Trade-off de Otimização):**
-  - **Nossa Matheurística:** Distância Total Percorrida de `140.158,00 m`, com média de `22,46 m/pedido` e `16,55 pedidos/corredor`.
-  - **Em tese (Onda Única com todos os pedidos):** Se o modelo exato resolvesse todo o backlog de 6.240 pedidos em uma única onda gigante (assumindo que todos cabem no $UB$), o operador visitaria os mesmos 377 corredores da matheurística, mas entraria em cada um **exatamente uma única vez**. A distância teórica percorrida seria de apenas `4.604 metros` (`2*20m + 377*10m + 397*2m`).
-  - **Por que a nossa distância acumulada é maior?** Porque a nossa Matheurística divide o backlog em 72 ondas/viagens menores e rápidas. Isso causa redundância (visitas repetidas aos mesmos corredores em ondas diferentes), acumulando os 140.158 metros ao longo das 72 viagens.
-  - **O Trade-off:** A literatura prioriza a distância mínima teórica (**4.604 metros**), mas trava o armazém por **19,63 minutos** (2 ciclos de 589s). A nossa Matheurística sacrifica a distância total (acumulando **140.158 metros** em 72 viagens separadas) para **ganhar velocidade de escoamento**, processando tudo na metade do tempo (**9,75 minutos**). É a escolha ideal para o tempo real do e-commerce.
-
-### 6. Estudo de Caso: Dataset X (Maior Instância - `instance_0014.txt`)
-
-Em testes na maior instância disponível do Dataset X (`instance_0014.txt`), a matheurística demonstrou altíssimo desempenho e escalabilidade, processando com sucesso dezenas de milhares de pedidos sob restrição de memória.
-
-```text
-══════════════════════════════════════════════════════════════════════
-  RESULTADOS ACUMULADOS DE TODA A EXECUÇÃO (589s)
-══════════════════════════════════════════════════════════════════════
-Total de Pedidos Selecionados: 43000
-Total de Corredores Visitados: 480
-Ratio Final Acumulado: 110.1042
-Distância Total Percorrida: 172406.00 m
-Distância Média por Pedido: 4.01 m/pedido
-Média de Pedidos por Corredor: 89.58 pedidos/corredor
-══════════════════════════════════════════════════════════════════════
-```
-
-- **Particionamento de Memória na GPU:** Para a instância X (68.064 pedidos e 54.106 itens), a matriz esparsa exigiria um bloco contínuo de 14.73 GB na GPU se fosse alocada de forma densa logo de início. O pipeline foi adaptado para pré-alocar as matrizes completas na CPU (RAM) e fazer as transferências e cálculos de multiplicação em **lotes (chunks) de 10.000 pedidos**. Isso reduziu o pico de VRAM para menos de 2 GB.
-- **Redução de Estruturas via Coleções Prévias:** Foi removido um laço aninhado de 3.68 bilhões de iterações em Python sobre a matriz esparsa. Em vez disso, a população de dados sobre quais itens pertencem a quais pedidos é feita diretamente a partir dos dicionários mapeados na leitura do arquivo. O tempo de pré-processamento dessa etapa caiu de horas para menos de 0.05 segundos.
 
 ---
 
-
 ## 📦 Instalação e Uso
-
 
 O ambiente foi totalmente preparado e validado para suportar aceleração por GPU via **CuPy** e resolução exata MILP com o **IBM CPLEX**.
 
 ### Opção 1: Miniconda
 Para instalar o ambiente Python com as dependências exatas a partir do arquivo Conda:
-
 ```bash
 conda env create -f environment.yml
 conda activate wopp
 ```
 
-
 ### Opção 2: Python Virtualenv + Pip
 Se preferir utilizar um ambiente virtual clássico via pip com o arquivo de requisitos:
-
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -292,11 +204,12 @@ pip install -r requirements.txt
 
 ### Execução em Docker
 O repositório inclui suporte completo para execução em containers com aceleração NVIDIA via `nvidia-container-toolkit`:
-
 ```bash
 docker build -t wopp-image .
 docker run --rm --gpus all -v $(pwd)/datasets:/app/datasets wopp-image
 ```
+
+---
 
 ## 📄 Licença
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
