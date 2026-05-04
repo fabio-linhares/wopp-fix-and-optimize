@@ -161,15 +161,22 @@ class InstanceReducer:
         t0 = time.time()
 
         # Pedido j domina pedido i se:
-        #   score[j] >= score[i]  AND  conflict[i, j] == True  AND  i != j
-        #
-        # score_ge[i, j] = True se score[j] >= score[i]
-        score_ge = scores[xp.newaxis, :] >= scores[:, xp.newaxis]  # (n, n)
+        #   (score[j] > score[i]) OR (score[j] == score[i] AND j < i)
+        # e eles entram em conflito.
+        score_gt = scores[xp.newaxis, :] > scores[:, xp.newaxis]  # (n, n)
+        score_eq = scores[xp.newaxis, :] == scores[:, xp.newaxis]  # (n, n)
+        
+        # Array de índices para desempate
+        indices = xp.arange(n_orders)
+        index_lt = indices[xp.newaxis, :] < indices[:, xp.newaxis]  # j < i
+        
+        # Matriz de dominância com desempate
+        dominates = score_gt | (score_eq & index_lt)
 
         # Pedido i é dominado se EXISTE algum j que o domina
         # Excluir auto-dominância (diagonal)
         identity_mask = xp.eye(n_orders, dtype=xp.bool_)
-        dominance_check = score_ge & conflict_matrix & (~identity_mask)
+        dominance_check = dominates & conflict_matrix & (~identity_mask)
 
         # is_dominated[i] = True se existe algum j que domina i
         is_dominated = xp.any(dominance_check, axis=1)  # (n,)
