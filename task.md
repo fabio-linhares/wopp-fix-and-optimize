@@ -17,7 +17,7 @@
     - [x] Remover a metaheurística autoral de ILS/Tabu.
     - [x] Adicionar comparação com as tabelas de Santos & Baldotto (2025) e Leal et al. (2025).
     - [x] Salvar arquivos CSV detalhados.
-- [ ] **📦 Módulo 5: Artigo Científico e Documentação (Finalização)**
-    - [ ] Atualizar o relatório técnico.
-    - [ ] Remover a coluna residual `$c_0=1$` da Tabela 4.
-    - [ ] Fazer commit final e enviar para o repositório público do GitHub.
+- [x] **📦 Módulo 5: Artigo Científico e Documentação (Finalização)**
+    - [x] Atualizar o relatório técnico.
+    - [x] Remover a coluna residual `$c_0=1$` da Tabela 4.
+    - [x] Fazer commit final e enviar para o repositório público do GitHub.
