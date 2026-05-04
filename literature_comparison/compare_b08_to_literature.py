@@ -7,7 +7,7 @@ import time
 import csv
 
 # Adicionar raiz do projeto ao path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config_manager import load_config
 from src.models.problem import WaveOrderPickingProblem
@@ -26,7 +26,8 @@ def main():
     config['algorithm']['solver'] = 'CPLEX'
     config['algorithm']['threads'] = str(os.cpu_count() or 20)
 
-    instance_path = "datasets/b/instance_0008.txt"
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    instance_path = os.path.join(root_dir, "datasets/b/instance_0008.txt")
 
     if not os.path.exists(instance_path):
         print(f"Erro: Instância não encontrada em {instance_path}")
@@ -132,7 +133,7 @@ def main():
         'is_valid': True
     })
 
-    output_path = "results/modulo_4/loop_benchmark_results.csv"
+    output_path = os.path.join(root_dir, "results/modulo_4/loop_benchmark_results.csv")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=results_list[0].keys())
