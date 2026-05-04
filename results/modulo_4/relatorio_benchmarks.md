@@ -137,3 +137,27 @@ Para fins de comparação justa com o método de Dinkelbach da literatura:
   - **Literatura (Dinkelbach):** Por focar na otimização pura do Ratio, a literatura ativa poucos corredores por onda (cerca de 27). A distância por onda seria de `2 * 20m + (27 * 10m) + (397 * 2m) = 1.104 metros`. Para 2 ondas, o percurso total seria de `2.208 metros` (média de `0,35 m/pedido`). 
 
 **Conclusão de Negócio:** A nossa solução não visa gerar uma "super onda perfeita" após 10 minutos de processamento estático, mas sim **garantir altíssimo rendimento na esteira de embalagem**. Enquanto a literatura prende os recursos de servidor e a equipe operacional por 10 minutos aguardando o cálculo de 1 onda ideal, a nossa Matheurística despachou 6.240 pedidos reais no mesmo período de tempo. É uma prova empírica incontestável de que descartar o "ótimo matemático" em prol de uma redução paralela em GPU confere a velocidade de decisão massiva exigida por operações de e-commerce de alto volume.
+
+---
+
+## 6. Resultados Experimentais: Dataset X - Maior Instância (`instance_0014.txt`)
+
+Em testes na maior instância disponível do Dataset X (`instance_0014.txt`), a matheurística demonstrou altíssimo desempenho e escalabilidade, processando com sucesso dezenas de milhares de pedidos sob restrição de memória.
+
+```text
+══════════════════════════════════════════════════════════════════════
+  RESULTADOS ACUMULADOS DE TODA A EXECUÇÃO (589s)
+══════════════════════════════════════════════════════════════════════
+Total de Pedidos Selecionados: 43000
+Total de Corredores Visitados: 480
+Ratio Final Acumulado: 110.1042
+Distância Total Percorrida: 172406.00 m
+Distância Média por Pedido: 4.01 m/pedido
+Média de Pedidos por Corredor: 89.58 pedidos/corredor
+══════════════════════════════════════════════════════════════════════
+```
+
+### 🧠 Otimizações Críticas para a Escala Massiva
+- **Particionamento de Memória na GPU:** Para a instância X (68.064 pedidos e 54.106 itens), a matriz esparsa exigiria um bloco contínuo de 14.73 GB na GPU se fosse alocada de forma densa logo de início. O pipeline foi adaptado para pré-alocar as matrizes completas na CPU (RAM) e fazer as transferências e cálculos de multiplicação em **lotes (chunks) de 10.000 pedidos**. Isso reduziu o pico de VRAM para menos de 2 GB.
+- **Redução de Estruturas via Coleções Prévias:** Foi removido um laço aninhado de 3.68 bilhões de iterações em Python sobre a matriz esparsa. Em vez disso, a população de dados sobre quais itens pertencem a quais pedidos é feita diretamente a partir dos dicionários mapeados na leitura do arquivo. O tempo de pré-processamento dessa etapa caiu de horas para menos de 0.05 segundos.
+

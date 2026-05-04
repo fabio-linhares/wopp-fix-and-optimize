@@ -244,7 +244,28 @@ Para fins de comparação justa com o método de Dinkelbach da literatura:
   - **Por que a nossa distância acumulada é maior?** Porque a nossa Matheurística divide o backlog em 72 ondas/viagens menores e rápidas. Isso causa redundância (visitas repetidas aos mesmos corredores em ondas diferentes), acumulando os 140.158 metros ao longo das 72 viagens.
   - **O Trade-off:** A literatura prioriza a distância mínima teórica (**4.604 metros**), mas trava o armazém por **19,63 minutos** (2 ciclos de 589s). A nossa Matheurística sacrifica a distância total (acumulando **140.158 metros** em 72 viagens separadas) para **ganhar velocidade de escoamento**, processando tudo na metade do tempo (**9,75 minutos**). É a escolha ideal para o tempo real do e-commerce.
 
+### 6. Estudo de Caso: Dataset X (Maior Instância - `instance_0014.txt`)
+
+Em testes na maior instância disponível do Dataset X (`instance_0014.txt`), a matheurística demonstrou altíssimo desempenho e escalabilidade, processando com sucesso dezenas de milhares de pedidos sob restrição de memória.
+
+```text
+══════════════════════════════════════════════════════════════════════
+  RESULTADOS ACUMULADOS DE TODA A EXECUÇÃO (589s)
+══════════════════════════════════════════════════════════════════════
+Total de Pedidos Selecionados: 43000
+Total de Corredores Visitados: 480
+Ratio Final Acumulado: 110.1042
+Distância Total Percorrida: 172406.00 m
+Distância Média por Pedido: 4.01 m/pedido
+Média de Pedidos por Corredor: 89.58 pedidos/corredor
+══════════════════════════════════════════════════════════════════════
+```
+
+- **Particionamento de Memória na GPU:** Para a instância X (68.064 pedidos e 54.106 itens), a matriz esparsa exigiria um bloco contínuo de 14.73 GB na GPU se fosse alocada de forma densa logo de início. O pipeline foi adaptado para pré-alocar as matrizes completas na CPU (RAM) e fazer as transferências e cálculos de multiplicação em **lotes (chunks) de 10.000 pedidos**. Isso reduziu o pico de VRAM para menos de 2 GB.
+- **Redução de Estruturas via Coleções Prévias:** Foi removido um laço aninhado de 3.68 bilhões de iterações em Python sobre a matriz esparsa. Em vez disso, a população de dados sobre quais itens pertencem a quais pedidos é feita diretamente a partir dos dicionários mapeados na leitura do arquivo. O tempo de pré-processamento dessa etapa caiu de horas para menos de 0.05 segundos.
+
 ---
+
 
 ## 📦 Instalação e Uso
 
