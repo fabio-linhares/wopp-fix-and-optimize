@@ -26,9 +26,15 @@ Executa a suíte de experimentos experimentais (configurações C1 e C2) em inst
 python literature_comparison/compare_modulo4_to_literature.py
 ```
 
-## 🗃️ Resultados e Métricas
+## 🗃️ Onde os Resultados Estão Salvos
 
-Os resultados gerados por estes scripts alimentam os relatórios e comparativos salvos no diretório `results/modulo_4/`.
+Todos os resultados gerados pela execução dos scripts de comparação com a literatura são salvos no seguinte diretório:
+
+📂 `results/modulo_4/`
+
+Os arquivos específicos gerados são:
+- **`results/modulo_4/loop_benchmark_results.csv`**: Histórico detalhado das iterações contínuas da instância B08 executadas em 589 segundos por `compare_b08_to_literature.py`.
+- **`results/modulo_4/experiments.csv`**: Resultados consolidados de todas as configurações (C1 e C2) executadas por `compare_modulo4_to_literature.py`.
 
 ---
 
