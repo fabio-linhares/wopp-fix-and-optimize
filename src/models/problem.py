@@ -164,45 +164,47 @@ class WaveOrderPickingProblem:
             for item_id, quantity in self.orders[order_id].items():
                 item_order_map_np[item_id, idx] = quantity
         
-        # Transferir em partições para evitar picos de memória e fragmentação na GPU
-        item_order_map = cp.empty((max_item_id, len(order_ids)), dtype=cp.int32)
-        chunk_size = 10000
-        for start in range(0, len(order_ids), chunk_size):
-            end = min(start + chunk_size, len(order_ids))
-            item_order_map[:, start:end] = cp.asarray(item_order_map_np[:, start:end])
-
         item_aisle_map_np = np.zeros((max_item_id, len(aisle_ids)), dtype=np.int32)
         for idx, aisle_id in enumerate(aisle_ids):
             for item_id, quantity in self.aisles[aisle_id].items():
                 item_aisle_map_np[item_id, idx] = quantity
-        
+
+        # Salvar matrizes na CPU para reutilização ou processamento em chunks
+        self._cpu_item_order_map = item_order_map_np
+        self._cpu_item_aisle_map = item_aisle_map_np
+
+        if len(order_ids) <= 20000:
+            # Transferir em partições para a GPU apenas se couber confortavelmente
+            item_order_map = cp.empty((max_item_id, len(order_ids)), dtype=cp.int32)
+            chunk_size = 10000
+            for start in range(0, len(order_ids), chunk_size):
+                end = min(start + chunk_size, len(order_ids))
+                item_order_map[:, start:end] = cp.asarray(item_order_map_np[:, start:end])
+            self._gpu_item_order_map = item_order_map
+        else:
+            self._gpu_item_order_map = None
+
         item_aisle_map = cp.asarray(item_aisle_map_np)
-        
-        order_totals_gpu = cp.sum(item_order_map, axis=0)
-        
-        # Armazenar referências para matrizes GPU para reutilização
-        self._gpu_item_order_map = item_order_map
         self._gpu_item_aisle_map = item_aisle_map
         
+        if self._gpu_item_order_map is not None:
+            order_totals_gpu = cp.sum(self._gpu_item_order_map, axis=0)
+            item_order_cpu = self._gpu_item_order_map.get()
+        else:
+            item_order_cpu = self._cpu_item_order_map
+
         # Ainda transferir para CPU para uso em funções não-GPU
-        item_aisle_cpu = item_aisle_map.get()
         self.item_units_by_aisle.clear()
-        for item_id_val in all_items:
-            for aisle_idx, aisle_id_val in enumerate(aisle_ids):
-                quantity = int(item_aisle_cpu[item_id_val, aisle_idx])
-                if quantity > 0:
-                    self.item_units_by_aisle[item_id_val][aisle_id_val] = quantity
+        for aisle_id, aisle_items in self.aisles.items():
+            for item_id, quantity in aisle_items.items():
+                self.item_units_by_aisle[item_id][aisle_id] = quantity
         
         self.item_units_by_order.clear()
-        item_order_cpu = item_order_map.get()
-        for item_id_val in all_items:
-            for order_idx, order_id_val in enumerate(order_ids):
-                quantity = int(item_order_cpu[item_id_val, order_idx])
-                if quantity > 0:
-                    self.item_units_by_order[item_id_val][order_id_val] = quantity
+        for order_id, order_items in self.orders.items():
+            for item_id, quantity in order_items.items():
+                self.item_units_by_order[item_id][order_id] = quantity
         
-        order_totals_cpu = order_totals_gpu.get()
-        self.order_units = {order_id: int(order_totals_cpu[idx]) for idx, order_id in enumerate(order_ids)}
+        self.order_units = {oid: sum(self.orders[oid].values()) for oid in order_ids}
 
     def _preprocess_multithread(self):
         """Implementação do pré-processamento usando multithreading."""
