@@ -68,6 +68,13 @@ def main():
         problem.orders = sliced_orders
         problem.n_orders = len(sliced_orders)
 
+        # AJUSTE PROPORCIONAL DE LIMITES DE CAPACIDADE (LB e UB)
+        # Como reduzimos para 200 pedidos, os limites de unidades devem ser proporcionais
+        # à soma de unidades do subconjunto fatiado de pedidos
+        subset_units = sum(sum(items.values()) for items in sliced_orders.values())
+        problem.wave_size_lb = int(subset_units * 0.1)
+        problem.wave_size_ub = int(subset_units * 0.95)
+
         solver = PLISolver(problem, config)
         start_step = time.time()
         solution = solver.solve(start_step)
