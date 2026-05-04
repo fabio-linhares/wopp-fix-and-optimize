@@ -39,7 +39,10 @@ def main():
     config['algorithm']['threads'] = str(os.cpu_count() or 20)
 
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    instance_path = os.path.join(root_dir, "datasets/b/instance_0008.txt")
+    if len(sys.argv) > 1:
+        instance_path = sys.argv[1] if os.path.isabs(sys.argv[1]) else os.path.join(root_dir, sys.argv[1])
+    else:
+        instance_path = os.path.join(root_dir, "datasets/b/instance_0008.txt")
 
     if not os.path.exists(instance_path):
         print(f"Erro: Instância não encontrada em {instance_path}")
