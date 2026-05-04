@@ -45,6 +45,9 @@ def main():
         print("Certifique-se de executar na raiz do projeto.")
         return
 
+    problem = WaveOrderPickingProblem(config=config)
+    problem.read_input(instance_path)
+
     results_list = []
     start_all = time.time()
     max_duration = 589.0
@@ -68,9 +71,6 @@ def main():
         
         # O solver usa a chave max_runtime para limitar a busca exata
         config['algorithm']['max_runtime'] = str(int(min(60, remaining_time)))
-
-        problem = WaveOrderPickingProblem(config=config)
-        problem.read_input(instance_path)
 
         # Descartar pedidos já processados nas voltas anteriores
         if all_selected_orders:
