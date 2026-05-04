@@ -72,6 +72,12 @@ def main():
         problem = WaveOrderPickingProblem(config=config)
         problem.read_input(instance_path)
 
+        # Descartar pedidos já processados nas voltas anteriores
+        if all_selected_orders:
+            problem.orders = {o: items for o, items in problem.orders.items() if o not in all_selected_orders}
+            problem.order_units = {o: u for o, u in problem.order_units.items() if o not in all_selected_orders}
+            problem.n_orders = len(problem.orders)
+
         solver = PLISolver(problem, config)
         start_step = time.time()
         solution = solver.solve(start_step)
