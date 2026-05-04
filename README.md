@@ -220,7 +220,10 @@ No mesmo exato intervalo de 589 segundos, a nossa Matheurística sacrificou a ex
 - **Total de Visitas a Corredores:** `373`
 - **Ratio Fracionário Médio:** `19.83`
 
-Isso comprova uma **vantagem logística massiva**: enquanto a literatura "trava" os recursos computacionais do armazém por 10 minutos aguardando o cálculo de 1 onda ideal de ~150 pedidos, a nossa solução entrega **72 ondas válidas e despacha mais de 5.300 pedidos no mesmo período**. É um sistema construído explicitamente para a velocidade e escalabilidade exigidas pelo tempo real do e-commerce.
+- **Otimização Operacional (Time Limit por Onda):**
+Nosso pipeline ajusta o tempo máximo de execução por onda para **10 segundos** (em vez dos 60s originais). Essa escolha se baseia na realidade de Centros de Distribuição de alto volume: não faz sentido manter a esteira logísticamente ociosa por 1 minuto calculando uma onda de pedidos com baixa densidade na "cauda longa" do backlog. Ao limitar o solver em 10 segundos na cauda, permitimos que ele devolva a melhor solução viável encontrada naquele intervalo, limpando rapidamente os piores pedidos e maximizando o escoamento global do estoque no mesmo limite de 589s.
+
+Isso comprova uma **vantagem logística massiva**: enquanto a literatura "trava" os recursos computacionais do armazém por 10 minutos aguardando o cálculo de 1 onda ideal de ~150 pedidos, a nossa solução entrega dezenas de ondas válidas e despacha milhares de pedidos no mesmo período. É um sistema construído explicitamente para a velocidade e escalabilidade exigidas pelo tempo real do e-commerce.
 
 
 ---
