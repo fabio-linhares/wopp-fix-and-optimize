@@ -92,12 +92,15 @@ def main():
             start_step = time.time()
             solution = solver.solve(start_step)
             step_elapsed = time.time() - start_step
-            # Restaurar a preferência pelo CPLEX
-            config['algorithm']['solver'] = 'CPLEX'
+            # Permanecer com o CBC para as próximas iterações
 
         official_metric = round(solution.objective_value or 0.0, 4) if solution else 0.0
         orders_selected = len(solution.selected_orders) if solution and solution.selected_orders else 0
         aisles_visited = len(solution.visited_aisles) if solution and solution.visited_aisles else 0
+
+        if orders_selected == 0:
+            print("\nNenhum pedido adicional foi selecionado nesta iteração ou problema inviável. Finalizando benchmark.")
+            break
 
         # Validação da solução via validador do Mercado Livre
         is_valid = True  # Para o loop de benchmark exploratory, a matheurística é considerada viável.
