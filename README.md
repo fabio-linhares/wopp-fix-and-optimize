@@ -1,6 +1,6 @@
 # WOPP Matheuristic Optimization Pipeline
 
-Pipeline de otimização matheurístico (*Fix-and-Optimize*) que combina redução agressiva de escopo acelerada por hardware gráfico (GPU) com resolução exata de subproblemas MILP para o Problema de Seleção em Ondas de Pedidos (Wave Order Picking Problem - WOPP).
+Pipeline de otimização matheurístico (*Fix-and-Optimize*) que combina redução agressiva de escopo acelerada por hardware gráfico (GPU) com resolução exata de subproblemas MILP para o Problema de Seleção em Ondas de Pedidos (Wave Order Pickig Problem - WOPP).
 
 ---
 
