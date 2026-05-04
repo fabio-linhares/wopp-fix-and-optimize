@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ====================================================================
+# PROJETO: WOPP - Wave Order Picking Problem (SBPO 2026)
+# Universidade Federal de Alagoas (UFAL)
+# Programa de Pós Graduação em Informática - Mestrado (PPGI)
+# DATA DE CRIAÇÃO: 03/05/2026
+# VERSÃO: 1.0.0
+# DESENVOLVEDOR: Fabio Linhares <fl@ic.ufal.br>
+# DESENVOLVEDOR: Cristiano Estumano <ces@ic.ufal.br>
+
+# LICENÇA: MIT License
+# ====================================================================
 
 import sys
 import os
