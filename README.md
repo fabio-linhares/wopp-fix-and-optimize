@@ -233,6 +233,15 @@ A nossa Matheurística respeita rigorosamente a restrição de cobertura de iten
 
 Isso comprova uma **vantagem logística massiva**: enquanto a literatura "trava" os recursos computacionais do armazém por 10 minutos aguardando o cálculo de 1 onda ideal de ~150 pedidos, a nossa solução entrega dezenas de ondas válidas e despacha milhares de pedidos no mesmo período. É um sistema construído explicitamente para a velocidade e escalabilidade exigidas pelo tempo real do e-commerce.
 
+- **Análise de Throughput vs. Método de Dinkelbach (SBPO 2025):**
+Para fins de comparação justa com o método de Dinkelbach da literatura:
+- **Tempo para processar 6.240 pedidos:**
+  - **Nossa Matheurística:** **585 segundos** (9,75 minutos)
+  - **Literatura (Dinkelbach):** Cada onda leva 589 segundos para convergir e atinge no máximo o limite superior (UB = 6.120 unidades, cerca de 4.600 pedidos). Para atingir os mesmos 6.240 pedidos, seriam necessários no mínimo 2 ciclos completos de onda, totalizando `2 * 589s = 1.178 segundos` (**19,63 minutos**). A nossa solução faz o escoamento na metade do tempo.
+- **Distância e Percurso Médio:**
+  - **Literatura (Dinkelbach):** Por focar na otimização pura do Ratio, a literatura ativa poucos corredores por onda (cerca de 27). A distância por onda seria de `2 * 20m + (27 * 10m) + (397 * 2m) = 1.104 metros`. Para 2 ondas, o percurso total seria de `2.208 metros` (média de `0,35 m/pedido`). 
+  - **Conclusão:** O método de Dinkelbach minimiza o percurso total por focar na consolidação estática em ondas gigantescas de 10 minutos. Em contrapartida, a nossa Matheurística prioriza a **velocidade máxima de despacho**, liberando o backlog completo duas vezes mais rápido para a esteira do e-commerce.
+
 ---
 
 ## 📦 Instalação e Uso
