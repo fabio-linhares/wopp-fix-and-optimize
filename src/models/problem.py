@@ -97,9 +97,8 @@ class WaveOrderPickingProblem:
 
         processed_method = "Nenhum"
 
-        if _CUDA_IMPORT_SUCCESSFUL and self.n_orders <= 20000:
+        if _CUDA_IMPORT_SUCCESSFUL:
             try:
-        #        print("INFO: Tentando pré-processamento com CUDA...")
                 self._preprocess_cuda()
                 processed_method = "CUDA"
         #        print("INFO: Pré-processamento com CUDA bem-sucedido.")
@@ -160,15 +159,24 @@ class WaveOrderPickingProblem:
         order_ids = list(self.orders.keys())
         aisle_ids = list(self.aisles.keys())
         
-        item_order_map = cp.zeros((max_item_id, len(order_ids)), dtype=cp.int32)
+        item_order_map_np = np.zeros((max_item_id, len(order_ids)), dtype=np.int32)
         for idx, order_id in enumerate(order_ids):
             for item_id, quantity in self.orders[order_id].items():
-                item_order_map[item_id, idx] = quantity
+                item_order_map_np[item_id, idx] = quantity
         
-        item_aisle_map = cp.zeros((max_item_id, len(aisle_ids)), dtype=cp.int32)
+        # Transferir em partições para evitar picos de memória e fragmentação na GPU
+        item_order_map = cp.empty((max_item_id, len(order_ids)), dtype=cp.int32)
+        chunk_size = 10000
+        for start in range(0, len(order_ids), chunk_size):
+            end = min(start + chunk_size, len(order_ids))
+            item_order_map[:, start:end] = cp.asarray(item_order_map_np[:, start:end])
+
+        item_aisle_map_np = np.zeros((max_item_id, len(aisle_ids)), dtype=np.int32)
         for idx, aisle_id in enumerate(aisle_ids):
             for item_id, quantity in self.aisles[aisle_id].items():
-                item_aisle_map[item_id, idx] = quantity
+                item_aisle_map_np[item_id, idx] = quantity
+        
+        item_aisle_map = cp.asarray(item_aisle_map_np)
         
         order_totals_gpu = cp.sum(item_order_map, axis=0)
         
