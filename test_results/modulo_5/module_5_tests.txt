@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /home/zerocopia/miniconda3/envs/wop/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /home/zerocopia/Downloads/sbpo 2026/Projeto_MercadoLivre_v4
+collecting ... collected 3 items
+
+test_modulo5.py::TestModulo5Finalizacao::test_docs_presence PASSED       [ 33%]
+test_modulo5.py::TestModulo5Finalizacao::test_removal_of_residual_column PASSED [ 66%]
+test_modulo5.py::TestModulo5Finalizacao::test_results_presence PASSED    [100%]
+
+============================== 3 passed in 0.01s ===============================
