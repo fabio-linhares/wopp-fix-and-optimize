@@ -53,12 +53,12 @@ class GPUManager:
             dtype=cp.float32
         )
             
-            # Adicionar outros dados necessários
-            self.gpu_data['n_orders'] = self.problem.n_orders
-            self.gpu_data['n_aisles'] = self.problem.n_aisles
-            self.gpu_data['n_items'] = self.problem.n_items
-            self.gpu_data['wave_size_lb'] = self.problem.wave_size_lb
-            self.gpu_data['wave_size_ub'] = self.problem.wave_size_ub
+        # Adicionar outros dados necessários
+        self.gpu_data['n_orders'] = self.problem.n_orders
+        self.gpu_data['n_aisles'] = self.problem.n_aisles
+        self.gpu_data['n_items'] = self.problem.n_items
+        self.gpu_data['wave_size_lb'] = self.problem.wave_size_lb
+        self.gpu_data['wave_size_ub'] = self.problem.wave_size_ub
     
     def _create_item_order_matrix(self):
         """
